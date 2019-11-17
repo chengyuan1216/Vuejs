@@ -4,8 +4,7 @@ import Vue from 'core/index'
 import config from 'core/config'
 import { extend, noop } from 'shared/util'
 import { mountComponent } from 'core/instance/lifecycle'
-import { devtools, inBrowser, isChrome } from 'core/util/index'
-import { log, O2S, debugConfig }  from 'core/util/log.js'
+import { devtools, inBrowser } from 'core/util/index'
 
 import {
   query,
@@ -39,7 +38,6 @@ Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean
 ): Component {
-  if (debugConfig['src/platforms/web/runtime/index/$mount']) debugger
   el = el && inBrowser ? query(el) : undefined
   return mountComponent(this, el, hydrating)
 }
@@ -53,8 +51,7 @@ if (inBrowser) {
         devtools.emit('init', Vue)
       } else if (
         process.env.NODE_ENV !== 'production' &&
-        process.env.NODE_ENV !== 'test' &&
-        isChrome
+        process.env.NODE_ENV !== 'test'
       ) {
         console[console.info ? 'info' : 'log'](
           'Download the Vue Devtools extension for a better development experience:\n' +

@@ -4,18 +4,12 @@ import {
   tip,
   toArray,
   hyphenate,
-  handleError,
-  formatComponentName
+  formatComponentName,
+  invokeWithErrorHandling
 } from '../util/index'
 import { updateListeners } from '../vdom/helpers/index'
-import { log, O2S, debugConfig }  from 'core/util/log.js'
 
-// 定义_events 对象用于存储所有的事件handle
 export function initEvents (vm: Component) {
-  // log({
-  //   title: '执行 initEvents()',
-  //   module: 'events'
-  // })
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
@@ -27,16 +21,22 @@ export function initEvents (vm: Component) {
 
 let target: any
 
-function add (event, fn, once) {
-  if (once) {
-    target.$once(event, fn)
-  } else {
-    target.$on(event, fn)
-  }
+function add (event, fn) {
+  target.$on(event, fn)
 }
 
 function remove (event, fn) {
   target.$off(event, fn)
+}
+
+function createOnceHandler (event, fn) {
+  const _target = target
+  return function onceHandler () {
+    const res = fn.apply(null, arguments)
+    if (res !== null) {
+      _target.$off(event, onceHandler)
+    }
+  }
 }
 
 export function updateComponentListeners (
@@ -45,21 +45,17 @@ export function updateComponentListeners (
   oldListeners: ?Object
 ) {
   target = vm
-  updateListeners(listeners, oldListeners || {}, add, remove, vm)
+  updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
   target = undefined
 }
 
 export function eventsMixin (Vue: Class<Component>) {
-  if (debugConfig['src/stance/events/eventsMixin']) debugger
-
   const hookRE = /^hook:/
-
-  //log('Vue原型增加$on方法')
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {
     const vm: Component = this
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$on(event[i], fn)
+        vm.$on(event[i], fn)
       }
     } else {
       (vm._events[event] || (vm._events[event] = [])).push(fn)
@@ -72,7 +68,6 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  //log('Vue原型增加$once方法')
   Vue.prototype.$once = function (event: string, fn: Function): Component {
     const vm: Component = this
     function on () {
@@ -84,7 +79,6 @@ export function eventsMixin (Vue: Class<Component>) {
     return vm
   }
 
-  //log('Vue原型增加$off方法')
   Vue.prototype.$off = function (event?: string | Array<string>, fn?: Function): Component {
     const vm: Component = this
     // all
@@ -95,7 +89,7 @@ export function eventsMixin (Vue: Class<Component>) {
     // array of events
     if (Array.isArray(event)) {
       for (let i = 0, l = event.length; i < l; i++) {
-        this.$off(event[i], fn)
+        vm.$off(event[i], fn)
       }
       return vm
     }
@@ -108,22 +102,19 @@ export function eventsMixin (Vue: Class<Component>) {
       vm._events[event] = null
       return vm
     }
-    if (fn) {
-      // specific handler
-      let cb
-      let i = cbs.length
-      while (i--) {
-        cb = cbs[i]
-        if (cb === fn || cb.fn === fn) {
-          cbs.splice(i, 1)
-          break
-        }
+    // specific handler
+    let cb
+    let i = cbs.length
+    while (i--) {
+      cb = cbs[i]
+      if (cb === fn || cb.fn === fn) {
+        cbs.splice(i, 1)
+        break
       }
     }
     return vm
   }
 
-  //log('Vue原型增加$emit方法')
   Vue.prototype.$emit = function (event: string): Component {
     const vm: Component = this
     if (process.env.NODE_ENV !== 'production') {
@@ -142,12 +133,9 @@ export function eventsMixin (Vue: Class<Component>) {
     if (cbs) {
       cbs = cbs.length > 1 ? toArray(cbs) : cbs
       const args = toArray(arguments, 1)
+      const info = `event handler for "${event}"`
       for (let i = 0, l = cbs.length; i < l; i++) {
-        try {
-          cbs[i].apply(vm, args)
-        } catch (e) {
-          handleError(e, vm, `event handler for "${event}"`)
-        }
+        invokeWithErrorHandling(cbs[i], vm, args, vm, info)
       }
     }
     return vm

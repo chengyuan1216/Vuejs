@@ -1,9 +1,9 @@
 /* @flow */
-//定义一个不允许改变的{}对象
+
 export const emptyObject = Object.freeze({})
 
-// these helpers produces better vm code in JS engines due to their
-// explicitness and function inlining
+// These helpers produce better VM code in JS engines due to their
+// explicitness and function inlining.
 export function isUndef (v: any): boolean %checks {
   return v === undefined || v === null
 }
@@ -21,7 +21,7 @@ export function isFalse (v: any): boolean %checks {
 }
 
 /**
- * Check if value is primitive
+ * Check if value is primitive.
  */
 export function isPrimitive (value: any): boolean %checks {
   return (
@@ -43,14 +43,11 @@ export function isObject (obj: mixed): boolean %checks {
 }
 
 /**
- * Get the raw type string of a value e.g. [object Object]
+ * Get the raw type string of a value, e.g., [object Object].
  */
-//通过Object.prototype.toString()来判断一个对象的具体类型
-//如果参数是一个基本类型那么会转换为包装类型
 const _toString = Object.prototype.toString
 
 export function toRawType (value: any): string {
-  //slice 的参数为负数时 相当于字符串的长度加上这个负数， 这里-1 代表 length-1
   return _toString.call(value).slice(8, -1)
 }
 
@@ -58,12 +55,10 @@ export function toRawType (value: any): string {
  * Strict object type check. Only returns true
  * for plain JavaScript objects.
  */
-//判断参数的类型是否是 Object 除Function、 RegExp
 export function isPlainObject (obj: any): boolean {
   return _toString.call(obj) === '[object Object]'
 }
 
-//判断是否是正则对象
 export function isRegExp (v: any): boolean {
   return _toString.call(v) === '[object RegExp]'
 }
@@ -71,40 +66,34 @@ export function isRegExp (v: any): boolean {
 /**
  * Check if val is a valid array index.
  */
-//检测一个值是否可以作为数组的索引
 export function isValidArrayIndex (val: any): boolean {
   const n = parseFloat(String(val))
-  //  n >=0 &&  n是整数  && n不是无穷大无穷小或Number(n)不是NaN
   return n >= 0 && Math.floor(n) === n && isFinite(val)
+}
+
+export function isPromise (val: any): boolean {
+  return (
+    isDef(val) &&
+    typeof val.then === 'function' &&
+    typeof val.catch === 'function'
+  )
 }
 
 /**
  * Convert a value to a string that is actually rendered.
  */
- //将参数转换成字符串 
- // null ===> ''
- // 对象 ===》
- // 基本类型 ===> 对应的字符串
- // JSON.stringify(jsonObj, func|arr, string|number)
- //第二个参数可以是一个函数或数组用于筛选输出的内容 第三个参数是用于定义输出排版
- //例如： 属性值是字符串的数据不输出
- //JSON.stringify(o, function(k, v){
- // if(typeof v == 'string') return ;
- // return v;
- //})
 export function toString (val: any): string {
   return val == null
     ? ''
-    : typeof val === 'object'
+    : Array.isArray(val) || (isPlainObject(val) && val.toString === _toString)
       ? JSON.stringify(val, null, 2)
       : String(val)
 }
 
 /**
- * Convert a input value to a number for persistence.
+ * Convert an input value to a number for persistence.
  * If the conversion fails, return original string.
  */
- //试图将一个值转换成数值， 如果转换失败则返回原始数据
 export function toNumber (val: string): number | string {
   const n = parseFloat(val)
   return isNaN(n) ? val : n
@@ -114,7 +103,6 @@ export function toNumber (val: string): number | string {
  * Make a map and return a function for checking if a key
  * is in that map.
  */
-//        
 export function makeMap (
   str: string,
   expectsLowerCase?: boolean
@@ -135,14 +123,13 @@ export function makeMap (
 export const isBuiltInTag = makeMap('slot,component', true)
 
 /**
- * Check if a attribute is a reserved attribute.
+ * Check if an attribute is a reserved attribute.
  */
 export const isReservedAttribute = makeMap('key,ref,slot,slot-scope,is')
 
 /**
- * Remove an item from an array
+ * Remove an item from an array.
  */
-//从一个数组中移除指定的项目
 export function remove (arr: Array<any>, item: any): Array<any> | void {
   if (arr.length) {
     const index = arr.indexOf(item)
@@ -153,11 +140,9 @@ export function remove (arr: Array<any>, item: any): Array<any> | void {
 }
 
 /**
- * Check whether the object has the property.
+ * Check whether an object has the property.
  */
 const hasOwnProperty = Object.prototype.hasOwnProperty
-//Object.prototype.hasOwnProperty(obj, prop)  判断某个属性是否是某个对象的私有属性, 不包括私有属性
-// in  包括私有属性
 export function hasOwn (obj: Object | Array<*>, key: string): boolean {
   return hasOwnProperty.call(obj, key)
 }
@@ -165,7 +150,6 @@ export function hasOwn (obj: Object | Array<*>, key: string): boolean {
 /**
  * Create a cached version of a pure function.
  */
-//缓存
 export function cached<F: Function> (fn: F): F {
   const cache = Object.create(null)
   return (function cachedFn (str: string) {
@@ -198,11 +182,11 @@ export const hyphenate = cached((str: string): string => {
 })
 
 /**
- * Simple bind polyfill for environments that do not support it... e.g.
- * PhantomJS 1.x. Technically we don't need this anymore since native bind is
- * now more performant in most browsers, but removing it would be breaking for
- * code that was able to run in PhantomJS 1.x, so this must be kept for
- * backwards compatibility.
+ * Simple bind polyfill for environments that do not support it,
+ * e.g., PhantomJS 1.x. Technically, we don't need this anymore
+ * since native bind is now performant enough in most browsers.
+ * But removing it would mean breaking code that was able to run in
+ * PhantomJS 1.x, so this must be kept for backward compatibility.
  */
 
 /* istanbul ignore next */
@@ -231,7 +215,6 @@ export const bind = Function.prototype.bind
 /**
  * Convert an Array-like object to a real Array.
  */
-//
 export function toArray (list: any, start?: number): Array<any> {
   start = start || 0
   let i = list.length - start
@@ -265,10 +248,12 @@ export function toObject (arr: Array<any>): Object {
   return res
 }
 
+/* eslint-disable no-unused-vars */
+
 /**
  * Perform no operation.
  * Stubbing args to make Flow happy without leaving useless transpiled code
- * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/)
+ * with ...rest (https://flow.org/blog/2017/05/07/Strict-Function-Call-Arity/).
  */
 export function noop (a?: any, b?: any, c?: any) {}
 
@@ -277,13 +262,15 @@ export function noop (a?: any, b?: any, c?: any) {}
  */
 export const no = (a?: any, b?: any, c?: any) => false
 
+/* eslint-enable no-unused-vars */
+
 /**
- * Return same value
+ * Return the same value.
  */
 export const identity = (_: any) => _
 
 /**
- * Generate a static keys string from compiler modules.
+ * Generate a string containing static keys from compiler modules.
  */
 export function genStaticKeys (modules: Array<ModuleOptions>): string {
   return modules.reduce((keys, m) => {
@@ -307,6 +294,8 @@ export function looseEqual (a: any, b: any): boolean {
         return a.length === b.length && a.every((e, i) => {
           return looseEqual(e, b[i])
         })
+      } else if (a instanceof Date && b instanceof Date) {
+        return a.getTime() === b.getTime()
       } else if (!isArrayA && !isArrayB) {
         const keysA = Object.keys(a)
         const keysB = Object.keys(b)
@@ -328,6 +317,11 @@ export function looseEqual (a: any, b: any): boolean {
   }
 }
 
+/**
+ * Return the first index at which a loosely equal value can be
+ * found in the array (if value is a plain object, the array must
+ * contain an object of the same shape), or -1 if it is not present.
+ */
 export function looseIndexOf (arr: Array<mixed>, val: mixed): number {
   for (let i = 0; i < arr.length; i++) {
     if (looseEqual(arr[i], val)) return i

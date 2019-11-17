@@ -1,124 +1,85 @@
 <!doctype html>
-<html>
-	<head>
-		<meta charset="utf-8">
-		<script type="text/javascript" src="vue.js"></script>
-	</head>
-	<body>
-		<div id="test">
-			<!-- <h1>测试 d : {{d}} --- e : {{e}}</h1> -->
-			<h1 ref="header">c: {{c}}</h1>
-			<button v-on:click="clickBtn">按钮</button>
-			<my-component :parent-message="message"></my-component>
-		</div>
-		<script type="text/javascript">
-			/*
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title>    </title>
+    <style>
+      .hello {
+        background: #e0e0e0;
+        font-size: 12px;
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="vue.js"></script>
+    <script>
 
-				(function() {
-				with(this){return _c('div',{attrs:{"id":"test"}},[_c('h1',[_v("c: "+_s(c))])])}
-				})
+    var ComA = {
+      props: {
+        name: {
+          type: String
+        }
+      },
+      data() {
+        return {
+          message: 'haha'
+        }
+      },
+      watch: {
+        message() {
 
+        }
+      },
+      methods: {
+        handleClick() {
+          this.message = Math.random()
+        }
+      },
+      render(h) {
+        return h('h1', {
+          ref: 'hello',
+          attrs: {
+            class: 'hello'
+          },
+          on: {
+            click: this.handleClick
+          }
+        }, this.name + ': ' + this.message)
+      }
+    }
 
-			*/
-			var myComponent = {
-				props: {
-					parentMessage: {}
-				},
-				data() {
-					return {
-						message: 'hello parent'
-					}
-				},
-				render(h){
-					var oStrong = h('strong', '这是子组件的消息:' + this.message)
-					var oEm = h('p', '这是来自父组件的消息:' + this.parentMessage)
-					return h('h1', {}, [oStrong, oEm])
-				}
-			}
-			var vm = new Vue({
-				components: {
-					myComponent
-				},
-				data:{
-					c: 12,
-					message: 'hello child'
-				},
-				methods:{
-					clickBtn: function(){
-						this.d = 100
-					}
-				},
-				computed: {
-					d: {
-						get() {
-							return this.c
-						},
-						set(v) {
-							this.c = v
-						}
-					},
-					e() {
-						return this.d
-					}
-				}
-			}).$mount('#test')
+    var App = {
+      render(h) {
+        return h('div', {
+          ref: 'app',
+          attrs: {
+            class: 'app',
+          }
+        }, this.$scopedSlots.default('liuchengyuan'))
+      }
+    }
 
-		// setTimeout(() => {
-		// 		alert('组件即将销毁')
-		// 		vm.$destroy()
-		// 	}, 3000)	
-			// var option = {
-			// 	props: {
-			// 		attr: {
-			// 			type: Number,
-			// 			default: 0
-			// 		}
-			// 	},
-
-			// 	data() {
-			// 		return {
-			// 			c: 1
-			// 		}
-			// 	},
-
-			// 	methods: {
-			// 		clickBtn() {
-			// 			var observer = new MutationObserver(function(m, o) {
-			// 				console.log('DOM变化了')
-			// 			})
-
-			// 			observer.observe(document.body, {
-			// 				'childList': true,
-			// 				'subtree': true
-			// 			})
-
-			// 			console.log('1', this.$refs.header.innerHTML)
-			// 			setTimeout(() => {
-			// 				console.log('异步', this.$refs.header.innerHTML)
-			// 			}, 0)
-			// 			// this.$nextTick(() => {
-			// 			// 	console.log('2', this.$refs.header.innerHTML)
-  			// 			// })
-			// 			this.c = 100
-
-
-			// 		}
-			// 	}
-			// }
-
-			// var myComponent = Vue.extend(option)
-
-			// console.log(myComponent.prototype)
-
-			// new myComponent({
-			// 	data() {
-			// 		return {d: 2}
-			// 	}
-			// }).$mount('#test')
-		</script>
-		<script>
-		</script>
-	</body>
+    window.vm = new Vue({
+      el: '#app',
+      components: {
+        App,
+        ComA
+      },
+      methods: {
+        handleClick() {
+          console.log('click')
+        }
+      },
+      template: `
+        <App ref="root">
+          <template slot-scope="scope">
+            <ComA :name="scope"/>
+          </template>
+        </App>
+      `
+    })
+    </script>
+  </body>
 </html>
-
-<!-- npm run dev 打包源码 -->

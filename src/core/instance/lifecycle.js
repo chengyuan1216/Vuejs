@@ -13,80 +13,65 @@ import {
   warn,
   noop,
   remove,
-  handleError,
   emptyObject,
-  validateProp
+  validateProp,
+  invokeWithErrorHandling
 } from '../util/index'
-import { log, O2S, debugConfig }  from 'core/util/log.js'
 
 export let activeInstance: any = null
 export let isUpdatingChildComponent: boolean = false
 
+export function setActiveInstance(vm: Component) {
+  const prevActiveInstance = activeInstance
+  activeInstance = vm
+  return () => {
+    activeInstance = prevActiveInstance
+  }
+}
 
-// 主要做了以下几件事情：
-// 1、初始化$parent， 如果有$parent 则将当前vm实例 push 到 $parent.children 中
-// 2、初始化$root
-// 3、初始化$children
-// 4、初始化$refs
-// 5、.....
 export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
-  // 获取父组件
   let parent = options.parent
   if (parent && !options.abstract) {
-    // 如果当前组件时抽象组件，则继续往上找
-    // 找到第一个不是抽象组件的父组件
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
-    // 如果有父组件则将当前组件加入 $children 数组
     parent.$children.push(vm)
   }
 
-  // 子组件持有父组件的引用
   vm.$parent = parent
-
-  // 子组件持有根组件的引用
   vm.$root = parent ? parent.$root : vm
 
-  // $children 用于保存所有子组件
   vm.$children = []
-  // 保存模板中 DOM 对象的引用
   vm.$refs = {}
 
-  vm._watcher = null // renderWatcher
+  vm._watcher = null
   vm._inactive = null
-  vm._directInactive = false // 以下的属性用于对组件对象的描述
+  vm._directInactive = false
   vm._isMounted = false
   vm._isDestroyed = false
   vm._isBeingDestroyed = false
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
-  if (debugConfig['src/stance/lifecycle/lifecycleMixin']) debugger
-    
-  //log('Vue原型添加_update方法')
-  // 这个方法的主要作用是根据生成的 Vnode对象去更新 DOM 元素
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
-    const prevEl = vm.$el // vm 对象对应的 DOM 元素
-    const prevVnode = vm._vnode // 旧 VNode 对象
-    const prevActiveInstance = activeInstance
-    activeInstance = vm
-    vm._vnode = vnode // 当前 Vnode 对象
+    const prevEl = vm.$el
+    const prevVnode = vm._vnode
+    const restoreActiveInstance = setActiveInstance(vm)
+    vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
     if (!prevVnode) {
       // initial render
-      // 第一次patch 时因为没有前一个 VNode, 所以会执行这里
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
     } else {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
-    activeInstance = prevActiveInstance
+    restoreActiveInstance()
     // update __vue__ reference
     if (prevEl) {
       prevEl.__vue__ = null
@@ -102,7 +87,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
-  //log('Vue原型添加$forceUpdate方法')
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
@@ -110,17 +94,9 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
-  //log('Vue原型添加$destroy方法')
-  // 销毁组建做了以下几件事情：
-  // 1、从父组件中移除
-  // 2、移除renderWatcher 上所有的依赖， 即数据的变化将不会再通知renderWatcher
-  // 3、同时组件上其他的watcher 也会取消对数据的订阅
-  // 4、移除所有通过$on或$once注册的事件
   Vue.prototype.$destroy = function () {
     const vm: Component = this
-    // 在执行 $destroy 时，会通过_isBeingDestroyed来标记是否已经开始销毁组件
-    // 如果已经执行过了将不会再执行， 以免重复执行钩子函数
-    if (vm._isBeingDestroyed) { 
+    if (vm._isBeingDestroyed) {
       return
     }
     callHook(vm, 'beforeDestroy')
@@ -162,8 +138,6 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
-// 在生成 render 函数后最终会执行这个方法
-
 export function mountComponent (
   vm: Component,
   el: ?Element,
@@ -190,8 +164,6 @@ export function mountComponent (
       }
     }
   }
-
-  // 在有了 render 方法后开始 调用 beforeMount 钩子函数
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -214,10 +186,8 @@ export function mountComponent (
       measure(`vue ${name} patch`, startTag, endTag)
     }
   } else {
-    // 这个方法做了两件事
-    // 1、通过 render 方法生成 vNode
-    // 2、找出新旧两个 vNode 的差异， 将差异变更到真实的 DOM 上面。
     updateComponent = () => {
+      debugger
       vm._update(vm._render(), hydrating)
     }
   }
@@ -227,7 +197,7 @@ export function mountComponent (
   // component's mounted hook), which relies on vm._watcher being already defined
   new Watcher(vm, updateComponent, noop, {
     before () {
-      if (vm._isMounted) {
+      if (vm._isMounted && !vm._isDestroyed) {
         callHook(vm, 'beforeUpdate')
       }
     }
@@ -255,12 +225,26 @@ export function updateChildComponent (
   }
 
   // determine whether component has slot children
-  // we need to do this before overwriting $options._renderChildren
-  const hasChildren = !!(
+  // we need to do this before overwriting $options._renderChildren.
+
+  // check if there are dynamic scopedSlots (hand-written or compiled but with
+  // dynamic slot names). Static scoped slots compiled from template has the
+  // "$stable" marker.
+  const newScopedSlots = parentVnode.data.scopedSlots
+  const oldScopedSlots = vm.$scopedSlots
+  const hasDynamicScopedSlot = !!(
+    (newScopedSlots && !newScopedSlots.$stable) ||
+    (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
+    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+  )
+
+  // Any static slot children from the parent may have changed during parent's
+  // update. Dynamic scoped slots may also have changed. In such cases, a forced
+  // update is necessary to ensure correctness.
+  const needsForceUpdate = !!(
     renderChildren ||               // has new static slots
     vm.$options._renderChildren ||  // has old static slots
-    parentVnode.data.scopedSlots || // has new scoped slots
-    vm.$scopedSlots !== emptyObject // has old scoped slots
+    hasDynamicScopedSlot
   )
 
   vm.$options._parentVnode = parentVnode
@@ -299,7 +283,7 @@ export function updateChildComponent (
   updateComponentListeners(vm, listeners, oldListeners)
 
   // resolve slots + force update if has children
-  if (hasChildren) {
+  if (needsForceUpdate) {
     vm.$slots = resolveSlots(renderChildren, parentVnode.context)
     vm.$forceUpdate()
   }
@@ -352,19 +336,12 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
-  log({
-    title: '执行' + hook +'--callHook',
-    module: 'lifecycle'
-  })
   pushTarget()
   const handlers = vm.$options[hook]
+  const info = `${hook} hook`
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
-      try {
-        handlers[i].call(vm)
-      } catch (e) {
-        handleError(e, vm, `${hook} hook`)
-      }
+      invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
   if (vm._hasHookEvent) {

@@ -19,13 +19,9 @@
       }
     </style>
     <!-- Delete ".min" for console warnings in development -->
-    <script src="../../dist/vue.js"></script>
+    <script src="../../dist/vue.min.js"></script>
   </head>
   <body>
-    <ol>
-      <li> 将index.html文件里的vue.min.js改成 vue.js </li>
-      <li> 直接在vue目录下运行 npm run dev </li>
-    </ol>
     <div id="demo">
       <h1>Latest Vue.js Commits</h1>
       <template v-for="branch in branches">
@@ -46,6 +42,7 @@
         </li>
       </ul>
     </div>
+    <script src="mock.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

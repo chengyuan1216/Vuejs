@@ -2,7 +2,6 @@
 
 import { ASSET_TYPES } from 'shared/constants'
 import { isPlainObject, validateComponentName } from '../util/index'
-import { log, O2S }  from 'core/util/log.js'
 
 export function initAssetRegisters (Vue: GlobalAPI) {
   /**

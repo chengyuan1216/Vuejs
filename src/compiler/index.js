@@ -4,7 +4,6 @@ import { parse } from './parser/index'
 import { optimize } from './optimizer'
 import { generate } from './codegen/index'
 import { createCompilerCreator } from './create-compiler'
-import { log, O2S }  from 'core/util/log.js'
 
 // `createCompilerCreator` allows creating compilers that use alternative
 // parser/optimizer/codegen, e.g the SSR optimizing compiler.
@@ -13,7 +12,7 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
 ): CompiledResult {
-  const ast = parse(template.trim(), options) // 生成抽象语法树
+  const ast = parse(template.trim(), options)
   if (options.optimize !== false) {
     optimize(ast, options)
   }
@@ -24,15 +23,3 @@ export const createCompiler = createCompilerCreator(function baseCompile (
     staticRenderFns: code.staticRenderFns
   }
 })
-
-/*
-  1、编译HTML字符串
-  parse(template.trim(), options)
-  在内部调用了parseHTML()
-
-  2、静态优化
-  optimize(ast, options)
-
-  3、生成render 函数
-
-*/
