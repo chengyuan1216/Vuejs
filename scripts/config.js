@@ -120,6 +120,7 @@ const builds = {
     banner
   },
   // Runtime+compiler development build (Browser)
+  // 运行时+编译 开发版本构建入口
   'web-full-dev': {
     entry: resolve('web/entry-runtime-with-compiler.js'),
     dest: resolve('dist/vue.js'),
