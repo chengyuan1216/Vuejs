@@ -6,12 +6,14 @@ import { isPlainObject, validateComponentName } from '../util/index'
 export function initAssetRegisters (Vue: GlobalAPI) {
   /**
    * Create asset registration methods.
+   * ASSET_TYPES: component、filter、directive
    */
   ASSET_TYPES.forEach(type => {
     Vue[type] = function (
       id: string,
       definition: Function | Object
     ): Function | Object | void {
+      // 如果definition不存在则返回定义的options
       if (!definition) {
         return this.options[type + 's'][id]
       } else {
@@ -21,6 +23,7 @@ export function initAssetRegisters (Vue: GlobalAPI) {
         }
         if (type === 'component' && isPlainObject(definition)) {
           definition.name = definition.name || id
+          // 如果是定义组件则会通过Vue.extend返回新的子类组件的构造函数。
           definition = this.options._base.extend(definition)
         }
         if (type === 'directive' && typeof definition === 'function') {

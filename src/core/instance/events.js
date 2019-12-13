@@ -13,6 +13,7 @@ export function initEvents (vm: Component) {
   vm._events = Object.create(null)
   vm._hasHookEvent = false
   // init parent attached events
+  // _parentListeners对象保存了组件在父组件模板上注册的事件
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)
@@ -45,10 +46,12 @@ export function updateComponentListeners (
   oldListeners: ?Object
 ) {
   target = vm
+  // 在父组件模板上注册的事件最终还是以$on注册的,注意：如果添加了.native修饰符将不会以这种方式注册事件
   updateListeners(listeners, oldListeners || {}, add, remove, createOnceHandler, vm)
   target = undefined
 }
 
+// 在core/index调用
 export function eventsMixin (Vue: Class<Component>) {
   const hookRE = /^hook:/
   Vue.prototype.$on = function (event: string | Array<string>, fn: Function): Component {

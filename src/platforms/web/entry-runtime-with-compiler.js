@@ -3,12 +3,13 @@
 import config from 'core/config'
 import { warn, cached } from 'core/util/index'
 import { mark, measure } from 'core/util/perf'
-
+// 引入的运行时版本
 import Vue from './runtime/index'
 import { query } from './util/index'
 import { compileToFunctions } from './compiler/index'
 import { shouldDecodeNewlines, shouldDecodeNewlinesForHref } from './util/compat'
 
+// 通过id获取模板字符串
 const idToTemplate = cached(id => {
   const el = query(id)
   return el && el.innerHTML
@@ -32,6 +33,7 @@ Vue.prototype.$mount = function (
 
   const options = this.$options
   // resolve template/el and convert to render function
+  // 如果传入的options没有 render 方法将会在运行时编译模板字符串生成render方法。
   if (!options.render) {
     let template = options.template
     if (template) {
@@ -80,6 +82,7 @@ Vue.prototype.$mount = function (
       }
     }
   }
+  // 在有了render方法后， 调用运行时的$mount方法。
   return mount.call(this, el, hydrating)
 }
 

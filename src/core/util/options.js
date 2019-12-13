@@ -305,7 +305,9 @@ function normalizeProps (options: Object, vm: ?Component) {
     while (i--) {
       val = props[i]
       if (typeof val === 'string') {
+        // 转驼峰
         name = camelize(val)
+        // 如果props是一个数组最终也会转成对象的形式，数组是一种简写的方式
         res[name] = { type: null }
       } else if (process.env.NODE_ENV !== 'production') {
         warn('props must be strings when using array syntax.')
@@ -315,6 +317,7 @@ function normalizeProps (options: Object, vm: ?Component) {
     for (const key in props) {
       val = props[key]
       name = camelize(key)
+      // 如果props是一个对象，可能会出现 {content: String}的情况
       res[name] = isPlainObject(val)
         ? val
         : { type: val }
@@ -398,14 +401,21 @@ export function mergeOptions (
     child = child.options
   }
 
+  // 规范处理props
   normalizeProps(child, vm)
+  // 规范处理inject
   normalizeInject(child, vm)
+  // 规范处理directive
   normalizeDirectives(child)
 
   // Apply extends and mixins on the child options,
   // but only if it is a raw options object that isn't
   // the result of another mergeOptions call.
   // Only merged options has the _base property.
+  // 处理extends和mixins
+  // 先处理extends,再处理mixins, 最后处理自己定义的options
+  // 所以如果是data、computed、method后者覆盖前者
+  // 如果是生命周期钩子， 将会依次加入数组顺序执行
   if (!child._base) {
     if (child.extends) {
       parent = mergeOptions(parent, child.extends, vm)
@@ -417,6 +427,7 @@ export function mergeOptions (
     }
   }
 
+  // 根据不同的合并策略合并options
   const options = {}
   let key
   for (key in parent) {
@@ -431,6 +442,7 @@ export function mergeOptions (
     const strat = strats[key] || defaultStrat
     options[key] = strat(parent[key], child[key], vm, key)
   }
+  // 返回最终的到的options
   return options
 }
 

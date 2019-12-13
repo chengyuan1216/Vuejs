@@ -15,7 +15,7 @@
     <div id="app"></div>
     <script src="vue.js"></script>
     <script>
-
+      debugger
     var ComA = {
       props: {
         name: {
@@ -49,15 +49,24 @@
         }, this.name + ': ' + this.message)
       }
     }
+    Vue.component('com-a', ComA)
 
     var App = {
+      methods: {
+        handleClick() {
+          this.$emit('my-click')
+        }
+      },
       render(h) {
         return h('div', {
           ref: 'app',
           attrs: {
             class: 'app',
+          },
+          on: {
+            click: this.handleClick
           }
-        }, this.$scopedSlots.default('liuchengyuan'))
+        }, this.$scopedSlots.default('A'))
       }
     }
 
@@ -73,9 +82,9 @@
         }
       },
       template: `
-        <App ref="root">
+        <App ref="root" @my-click="handleClick">
           <template slot-scope="scope">
-            <ComA :name="scope"/>
+            {{scope}}
           </template>
         </App>
       `

@@ -29,6 +29,7 @@ export function initGlobalAPI (Vue: GlobalAPI) {
       )
     }
   }
+  // 设置全局属性 Vue.config
   Object.defineProperty(Vue, 'config', configDef)
 
   // exposed util methods.
@@ -50,7 +51,8 @@ export function initGlobalAPI (Vue: GlobalAPI) {
     observe(obj)
     return obj
   }
-
+  
+  // 定义构造函数的options, 当定义一个子类时将会继承options
   Vue.options = Object.create(null)
   ASSET_TYPES.forEach(type => {
     Vue.options[type + 's'] = Object.create(null)
@@ -60,10 +62,17 @@ export function initGlobalAPI (Vue: GlobalAPI) {
   // components with in Weex's multi-instance scenarios.
   Vue.options._base = Vue
 
+  // 安装组件keep-alive
   extend(Vue.options.components, builtInComponents)
 
+  // 定义 Vue.use
   initUse(Vue)
+  // 定义 Vue.mixin
   initMixin(Vue)
+  // 定义Vue.extend
   initExtend(Vue)
+  // 定义  Vue.component
+  // 定义  Vue.directive
+  // 定义  Vue.filter
   initAssetRegisters(Vue)
 }
