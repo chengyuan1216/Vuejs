@@ -44,6 +44,7 @@ function createOnceHandler (event, handler, capture) {
 // safe to exclude.
 const useMicrotaskFix = isUsingMicroTask && !(isFF && Number(isFF[1]) <= 53)
 
+// 添加时间
 function add (
   name: string,
   handler: Function,
@@ -89,6 +90,7 @@ function add (
   )
 }
 
+// 移除事件
 function remove (
   name: string,
   handler: Function,

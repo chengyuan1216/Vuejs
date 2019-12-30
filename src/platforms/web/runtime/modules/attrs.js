@@ -18,23 +18,29 @@ import {
   convertEnumeratedValue
 } from 'web/util/index'
 
+// 更新DOM attr
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   const opts = vnode.componentOptions
+  // 如果inheritAttrs的值设置为false, 组件上定义的属性将不会作用到根元素
   if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {
     return
   }
+  // 如果新旧Vnode都未定义attr, 此时不需要更新
   if (isUndef(oldVnode.data.attrs) && isUndef(vnode.data.attrs)) {
     return
   }
   let key, cur, old
+  // vnode.elm指向dom元素
   const elm = vnode.elm
   const oldAttrs = oldVnode.data.attrs || {}
   let attrs: any = vnode.data.attrs || {}
   // clone observed objects, as the user probably wants to mutate it
+  // 如果attrs是Observer过, 将会复制成一个普通的对象
   if (isDef(attrs.__ob__)) {
     attrs = vnode.data.attrs = extend({}, attrs)
   }
 
+  // 遍历新节点的属性, 当新旧节点的属性值不一致时更新
   for (key in attrs) {
     cur = attrs[key]
     old = oldAttrs[key]
@@ -48,6 +54,7 @@ function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
   if ((isIE || isEdge) && attrs.value !== oldAttrs.value) {
     setAttr(elm, 'value', attrs.value)
   }
+  // 遍历旧节点的属性，如果当前属性是新节点没有的属性就删除掉
   for (key in oldAttrs) {
     if (isUndef(attrs[key])) {
       if (isXlink(key)) {
