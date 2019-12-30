@@ -308,6 +308,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 是否可patch
   function isPatchable (vnode) {
     while (vnode.componentInstance) {
       vnode = vnode.componentInstance._vnode
