@@ -30,8 +30,10 @@ import {
 
 export const emptyNode = new VNode('', {}, [])
 
+// vnode生命周期？
 const hooks = ['create', 'activate', 'update', 'remove', 'destroy']
 
+// 判断是否是同一节点
 function sameVnode (a, b) {
   return (
     a.key === b.key && (
@@ -57,6 +59,7 @@ function sameInputType (a, b) {
   return typeA === typeB || isTextInputType(typeA) && isTextInputType(typeB)
 }
 
+// 对数组进行快速访问
 function createKeyToOldIdx (children, beginIdx, endIdx) {
   let i, key
   const map = {}
@@ -67,12 +70,21 @@ function createKeyToOldIdx (children, beginIdx, endIdx) {
   return map
 }
 
+// 创建patch方法
 export function createPatchFunction (backend) {
   let i, j
   const cbs = {}
 
   const { modules, nodeOps } = backend
 
+  // 将在modules中定义的hooks收集
+  /*
+    cbs = {
+      create: [...],
+      activate: [...],
+      update: [...]
+    }
+  */
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
@@ -82,6 +94,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 创建一个空的vnode
   function emptyNodeAt (elm) {
     return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
@@ -96,6 +109,7 @@ export function createPatchFunction (backend) {
     return remove
   }
 
+  // 删除DOM节点
   function removeNode (el) {
     const parent = nodeOps.parentNode(el)
     // element may have already been removed due to v-html / v-text
