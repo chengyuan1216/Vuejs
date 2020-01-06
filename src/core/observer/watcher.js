@@ -206,6 +206,7 @@ export default class Watcher {
    * Will be called by the scheduler.
    */
   run () {
+    // active可用于控制当前watcher
     if (this.active) {
       const value = this.get()
       if (
@@ -214,7 +215,7 @@ export default class Watcher {
         // when the value is the same, because the value may
         // have mutated.
         isObject(value) ||
-        this.deep
+        this.deep // 如果是深度监听，尽管对象本身没有变化， 但是对象内部发生变化也因该执行cb
       ) {
         // set new value
         const oldValue = this.value
@@ -236,6 +237,7 @@ export default class Watcher {
    * Evaluate the value of the watcher.
    * This only gets called for lazy watchers.
    */
+  // computedWatcher 会用到
   evaluate () {
     this.value = this.get()
     this.dirty = false

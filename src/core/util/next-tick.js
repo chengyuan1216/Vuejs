@@ -7,7 +7,7 @@ import { isIE, isIOS, isNative } from './env'
 
 export let isUsingMicroTask = false
 
-const callbacks = []
+const callbacks = [] // 回调队列
 let pending = false
 
 function flushCallbacks () {
@@ -39,6 +39,7 @@ let timerFunc
 // completely stops working after triggering a few times... so, if native
 // Promise is available, we will use it:
 /* istanbul ignore next, $flow-disable-line */
+/* 优先使用promise开启异步任务 */
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   const p = Promise.resolve()
   timerFunc = () => {
@@ -56,6 +57,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
   // PhantomJS and iOS 7.x
   MutationObserver.toString() === '[object MutationObserverConstructor]'
 )) {
+/* 使用MutationObserver开启队列 */
   // Use MutationObserver where native Promise is not available,
   // e.g. PhantomJS, iOS7, Android 4.4
   // (#6466 MutationObserver is unreliable in IE11)
@@ -83,9 +85,10 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
     setTimeout(flushCallbacks, 0)
   }
 }
-
+/* nextTick */
 export function nextTick (cb?: Function, ctx?: Object) {
   let _resolve
+  // 将cb加入到callbacks中
   callbacks.push(() => {
     if (cb) {
       try {
@@ -97,11 +100,13 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
+  // 如果还未开启
   if (!pending) {
     pending = true
     timerFunc()
   }
   // $flow-disable-line
+  // 返回一个promise
   if (!cb && typeof Promise !== 'undefined') {
     return new Promise(resolve => {
       _resolve = resolve
