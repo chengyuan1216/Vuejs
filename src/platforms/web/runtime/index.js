@@ -38,6 +38,10 @@ Vue.prototype.__patch__ = inBrowser ? patch : noop
 
 // public mount method
 // 定义的运行时$mount方法
+/*
+  在初始化完vm对象后, 开始将组建挂载到DOM树，
+  此时created钩子已执行，beforeMount钩子未执行
+*/
 Vue.prototype.$mount = function (
   el?: string | Element,
   hydrating?: boolean

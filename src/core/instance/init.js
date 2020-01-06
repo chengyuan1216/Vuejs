@@ -37,9 +37,10 @@ export function initMixin (Vue: Class<Component>) {
       // internal component options needs special treatment.
       initInternalComponent(vm, options)
     } else {
+      // 通过合并策略得到最终的options
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor),
-        options || {},
+        resolveConstructorOptions(vm.constructor), /**从构造函数上获得的options */
+        options || {}, /**用户传入的options */
         vm
       )
     }
@@ -56,10 +57,15 @@ export function initMixin (Vue: Class<Component>) {
     // 初始化事件
     initEvents(vm)
     initRender(vm)
+    /* 在初始化完成后调用 beforeCreate 钩子 */
     callHook(vm, 'beforeCreate')
+    /* 获取从父组件注入的数据 */
     initInjections(vm) // resolve injections before data/props
+    // 初始化组件的数据包括 data、computed、methods
     initState(vm)
+    // 初始化要注入到子组件的数据
     initProvide(vm) // resolve provide after data/props
+    /* 调用 beforeCreate 钩子 */
     callHook(vm, 'created')
 
     /* istanbul ignore if */
@@ -94,10 +100,30 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   }
 }
 
+// 获取构造函数上的options
 export function resolveConstructorOptions (Ctor: Class<Component>) {
+  /**
+   获取当前构造函数上的options
+    {
+      "components": {
+        "KeepAlive": {},
+        "Transition": {},
+        "TransitionGroup": {}
+      },
+      "directives": {
+        "model": {},
+        "show": {}
+      },
+      "filters": {}
+    }
+   */
   let options = Ctor.options
+
+  /* 如果当前构造函数有父级 */
   if (Ctor.super) {
+    /* 先从父级获取options */
     const superOptions = resolveConstructorOptions(Ctor.super)
+    /* 获取缓存在Ctor上 super option */
     const cachedSuperOptions = Ctor.superOptions
     if (superOptions !== cachedSuperOptions) {
       // super option changed,

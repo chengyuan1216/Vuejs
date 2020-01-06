@@ -17,24 +17,33 @@ import VNode, { createEmptyVNode } from '../vdom/vnode'
 import { isUpdatingChildComponent } from './lifecycle'
 
 export function initRender (vm: Component) {
+  // 组件内部的根节点，展示的是组件内部的细节
+  // $vonde 是在父组件作用域生成的，展示的是外部使用时的细节
   vm._vnode = null // the root of the child tree
   vm._staticTrees = null // v-once cached trees
   const options = vm.$options
+  // 父节点
   const parentVnode = vm.$vnode = options._parentVnode // the placeholder node in parent tree
+  // 渲染父节点的上下文， 即使用组件时所在的作用域
   const renderContext = parentVnode && parentVnode.context
+  // 获取到slot， slot是在父组件作用域编译的
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
+  // 作用域slot
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
   // args order: tag, data, children, normalizationType, alwaysNormalize
   // internal version is used by render functions compiled from templates
+  // vue compiler 使用
   vm._c = (a, b, c, d) => createElement(vm, a, b, c, d, false)
   // normalization is always applied for the public version, used in
   // user-written render functions.
+  // 用户使用
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.
   // they need to be reactive so that HOCs using them are always updated
+  // 获取$vnode上的数据
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
@@ -46,6 +55,8 @@ export function initRender (vm: Component) {
       !isUpdatingChildComponent && warn(`$listeners is readonly.`, vm)
     }, true)
   } else {
+    // 在组件实例上可以通过$attrs访问到未使用props定义的非style、class属性
+    // 通过$listeners访问到定义的事件
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, null, true)
     defineReactive(vm, '$listeners', options._parentListeners || emptyObject, null, true)
   }

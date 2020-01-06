@@ -4,6 +4,7 @@ import type VNode from 'core/vdom/vnode'
 
 /**
  * Runtime helper for resolving raw children VNodes into a slot object.
+ * 获取slot渲染的节点
  */
 export function resolveSlots (
   children: ?Array<VNode>,

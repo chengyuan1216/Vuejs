@@ -7,6 +7,7 @@ import { warn } from '../util/index'
 
 // 定义构造函数
 function Vue (options) {
+  // 如果不是通过 new Vue() 调用将会抛出异常
   if (process.env.NODE_ENV !== 'production' &&
     !(this instanceof Vue)
   ) {

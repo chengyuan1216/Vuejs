@@ -45,6 +45,7 @@ if (process.env.NODE_ENV !== 'production') {
 
 /**
  * Helper that recursively merges two data objects together.
+ * 合并两个对象
  */
 function mergeData (to: Object, from: ?Object): Object {
   if (!from) return to
@@ -60,9 +61,10 @@ function mergeData (to: Object, from: ?Object): Object {
     if (key === '__ob__') continue
     toVal = to[key]
     fromVal = from[key]
+    // 如果原来的对象没有这个属性，则直接添加到原来的对象上
     if (!hasOwn(to, key)) {
       set(to, key, fromVal)
-    } else if (
+    } else if ( // 如果toVal和fromVal不相等并且都是json对象则合并这两个对象
       toVal !== fromVal &&
       isPlainObject(toVal) &&
       isPlainObject(fromVal)
@@ -74,7 +76,7 @@ function mergeData (to: Object, from: ?Object): Object {
 }
 
 /**
- * Data
+ * Data 合并data数据
  */
 export function mergeDataOrFn (
   parentVal: any,
@@ -94,6 +96,7 @@ export function mergeDataOrFn (
     // merged result of both functions... no need to
     // check if parentVal is a function here because
     // it has to be a function to pass previous merges.
+    // 如果合并的function,则先求值再合并
     return function mergedDataFn () {
       return mergeData(
         typeof childVal === 'function' ? childVal.call(this, this) : childVal,
@@ -143,6 +146,8 @@ strats.data = function (
 /**
  * Hooks and props are merged as arrays.
  */
+// 生命周期的合并不是简单的覆盖而是将extends和mixins还有组件本身定义的hooks
+// 合并为一个数组，执行的顺序一次是 extends、mixins、options定义
 function mergeHook (
   parentVal: ?Array<Function>,
   childVal: ?Function | ?Array<Function>
@@ -397,6 +402,7 @@ export function mergeOptions (
     checkComponents(child)
   }
 
+  /* 如果传入的是一个function类型， 则可能是一个构造函数 */
   if (typeof child === 'function') {
     child = child.options
   }

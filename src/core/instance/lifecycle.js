@@ -33,6 +33,7 @@ export function initLifecycle (vm: Component) {
   const options = vm.$options
 
   // locate first non-abstract parent
+  // 找到最近的不是抽象组件的父级， 将vm对象加入到这个父级的$children数组中
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
@@ -41,9 +42,11 @@ export function initLifecycle (vm: Component) {
     parent.$children.push(vm)
   }
 
+  // 定义$parent 和 $root
   vm.$parent = parent
   vm.$root = parent ? parent.$root : vm
 
+  // 定义$children $refs
   vm.$children = []
   vm.$refs = {}
 
@@ -138,12 +141,17 @@ export function lifecycleMixin (Vue: Class<Component>) {
   }
 }
 
+/*
+  挂载组件
+ */
 export function mountComponent (
   vm: Component,
   el: ?Element,
   hydrating?: boolean
 ): Component {
+  // $el可以访问dom
   vm.$el = el
+
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -164,6 +172,7 @@ export function mountComponent (
       }
     }
   }
+  /* 执行 beforeMount 钩子*/
   callHook(vm, 'beforeMount')
 
   let updateComponent
@@ -195,6 +204,7 @@ export function mountComponent (
   // we set this to vm._watcher inside the watcher's constructor
   // since the watcher's initial patch may call $forceUpdate (e.g. inside child
   // component's mounted hook), which relies on vm._watcher being already defined
+  // 创建 renderWatcher
   new Watcher(vm, updateComponent, noop, {
     before () {
       if (vm._isMounted && !vm._isDestroyed) {

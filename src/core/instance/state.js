@@ -35,6 +35,10 @@ const sharedPropertyDefinition = {
   set: noop
 }
 
+/**
+  target对象代理 target.sourceKey对象，
+  即： target.a === target.sourceKey.a, 访问target.sourceKey上的属性时可省略sourceKey直接访问。
+ */
 export function proxy (target: Object, sourceKey: string, key: string) {
   sharedPropertyDefinition.get = function proxyGetter () {
     return this[sourceKey][key]
@@ -46,27 +50,38 @@ export function proxy (target: Object, sourceKey: string, key: string) {
 }
 
 export function initState (vm: Component) {
+  // 用于保存当前组件上所有的watcher对象，包括renderWathcer、computedWatcher、userWatcher
   vm._watchers = []
   const opts = vm.$options
+  // 初始化props
   if (opts.props) initProps(vm, opts.props)
+  // 初始化methods
   if (opts.methods) initMethods(vm, opts.methods)
+  // 初始化data
   if (opts.data) {
     initData(vm)
   } else {
     observe(vm._data = {}, true /* asRootData */)
   }
+  // 初始化computed
   if (opts.computed) initComputed(vm, opts.computed)
+  // 初始化watch
   if (opts.watch && opts.watch !== nativeWatch) {
     initWatch(vm, opts.watch)
   }
 }
 
+/**
+  所有的props数据都会保存到vm._props上，然后vm通过代理vm._props，所以vm可直接访问vm._props上的属性
+ */
 function initProps (vm: Component, propsOptions: Object) {
+  // 可用于测试props的propsData
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
   // instead of dynamic object key enumeration.
   const keys = vm.$options._propKeys = []
+  // 是否是root组件
   const isRoot = !vm.$parent
   // root instance props should be converted
   if (!isRoot) {
@@ -74,6 +89,7 @@ function initProps (vm: Component, propsOptions: Object) {
   }
   for (const key in propsOptions) {
     keys.push(key)
+    // 校验prop
     const value = validateProp(key, propsOptions, propsData, vm)
     /* istanbul ignore else */
     if (process.env.NODE_ENV !== 'production') {
@@ -97,11 +113,13 @@ function initProps (vm: Component, propsOptions: Object) {
         }
       })
     } else {
+      // 将所有的数据挂在vm._props对象上
       defineReactive(props, key, value)
     }
     // static props are already proxied on the component's prototype
     // during Vue.extend(). We only need to proxy props defined at
     // instantiation here.
+    /* vm代理_props对象上所有的数据, 即可通过vm.a直接访问vm._props.a */
     if (!(key in vm)) {
       proxy(vm, `_props`, key)
     }
