@@ -10,9 +10,13 @@ export function normalizeScopedSlots (
   prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
+  // $slot上本来有的数据
   const hasNormalSlots = Object.keys(normalSlots).length > 0
+  // ?
   const isStable = slots ? !!slots.$stable : !hasNormalSlots
   const key = slots && slots.$key
+
+  // 如果slots不存在
   if (!slots) {
     res = {}
   } else if (slots._normalized) {
