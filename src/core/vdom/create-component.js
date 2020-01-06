@@ -44,10 +44,12 @@ const componentVNodeHooks = {
       const mountedNode: any = vnode // work around flow
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
+      // 创建组件实例
       const child = vnode.componentInstance = createComponentInstanceForVnode(
-        vnode,
-        activeInstance
+        vnode, // VNode节点对象
+        activeInstance // 父组件实例
       )
+      // 挂载组件
       child.$mount(hydrating ? vnode.elm : undefined, hydrating)
     }
   },
@@ -205,21 +207,24 @@ export function createComponent (
   return vnode
 }
 
+/* 根据Vnode对象生成组件对象 */
 export function createComponentInstanceForVnode (
   vnode: any, // we know it's MountedComponentVNode but flow doesn't
   parent: any, // activeInstance in lifecycle state
 ): Component {
   const options: InternalComponentOptions = {
-    _isComponent: true,
-    _parentVnode: vnode,
+    _isComponent: true, // 是否是自定义组件
+    _parentVnode: vnode, // 父Vnode
     parent
   }
   // check inline-template render functions
+  // 是否是inline-template
   const inlineTemplate = vnode.data.inlineTemplate
   if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render
     options.staticRenderFns = inlineTemplate.staticRenderFns
   }
+  /* componentOptions对象上保存了创建组件对象时的一些信息 */
   return new vnode.componentOptions.Ctor(options)
 }
 

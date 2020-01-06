@@ -10,6 +10,7 @@ export let isUsingMicroTask = false
 const callbacks = [] // 回调队列
 let pending = false
 
+// 在同步任务执行完之后将遍历执行所有的cb
 function flushCallbacks () {
   pending = false
   const copies = callbacks.slice(0)

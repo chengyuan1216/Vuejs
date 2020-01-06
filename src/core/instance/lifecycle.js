@@ -18,7 +18,7 @@ import {
   invokeWithErrorHandling
 } from '../util/index'
 
-export let activeInstance: any = null
+export let activeInstance: any = null // 当前vm实例
 export let isUpdatingChildComponent: boolean = false
 
 export function setActiveInstance(vm: Component) {
@@ -62,11 +62,15 @@ export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     const vm: Component = this
     const prevEl = vm.$el
+    // 上一次生成的vnode
     const prevVnode = vm._vnode
+    // 设置当前vm对象
     const restoreActiveInstance = setActiveInstance(vm)
+    // 将新的vnode对象保存在_vnode上
     vm._vnode = vnode
     // Vue.prototype.__patch__ is injected in entry points
     // based on the rendering backend used.
+    // 如果组件是第一次渲染
     if (!prevVnode) {
       // initial render
       vm.$el = vm.__patch__(vm.$el, vnode, hydrating, false /* removeOnly */)
