@@ -111,10 +111,12 @@ export function createComponent (
     return
   }
 
+  // 基础构造器Vue
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
   if (isObject(Ctor)) {
+    // 通过继承返回一个新的子类构造器
     Ctor = baseCtor.extend(Ctor)
   }
 
@@ -128,7 +130,9 @@ export function createComponent (
   }
 
   // async component
+  // 异步组件
   let asyncFactory
+  // 如果构造函数上没有cid,则可能是异步组件
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
@@ -150,28 +154,35 @@ export function createComponent (
 
   // resolve constructor options in case global mixins are applied after
   // component constructor creation
+  // 获取构造函数上的options
   resolveConstructorOptions(Ctor)
 
   // transform component v-model data into props & events
+  // model指令转换成属性绑定和事件
   if (isDef(data.model)) {
     transformModel(Ctor.options, data)
   }
 
   // extract props
+  /* 从VNodeData上获取props数据 */
   const propsData = extractPropsFromVNodeData(data, Ctor, tag)
 
   // functional component
+  // 函数式组件
   if (isTrue(Ctor.options.functional)) {
     return createFunctionalComponent(Ctor, propsData, data, context, children)
   }
 
   // extract listeners, since these needs to be treated as
   // child component listeners instead of DOM listeners
+  // 组件事件监听
   const listeners = data.on
   // replace with listeners with .native modifier
   // so it gets processed during parent component patch.
+  // 原生DOM事件监听
   data.on = data.nativeOn
 
+  // 抽象组件
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
     // other than props & listeners & slot
@@ -228,6 +239,7 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
+// 安装VNode hooks
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {

@@ -23,8 +23,9 @@ export function initExtend (Vue: GlobalAPI) {
     // 以当前构造函数作为父类
     const Super = this
     const SuperId = Super.cid
+    // 经过继承后的extendOptions对象上会有一个_Ctor缓存了所有的子类构造器
     const cachedCtors = extendOptions._Ctor || (extendOptions._Ctor = {})
-    // 
+    // 如果发现已经有缓存则直接返回
     if (cachedCtors[SuperId]) {
       return cachedCtors[SuperId]
     }

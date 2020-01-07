@@ -9,6 +9,7 @@ import {
   formatComponentName
 } from 'core/util/index'
 
+/* 从VNodeData上获取props数据 */
 export function extractPropsFromVNodeData (
   data: VNodeData,
   Ctor: Class<Component>,

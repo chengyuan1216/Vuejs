@@ -60,14 +60,19 @@ export function _createElement (
     return createEmptyVNode()
   }
   // object syntax in v-bind
+  // 动态组件，标签名应该使用data.is
   if (isDef(data) && isDef(data.is)) {
     tag = data.is
   }
+
+  // 如果tag不存在则返回一个空的节点
   if (!tag) {
     // in case of component :is set to falsy value
     return createEmptyVNode()
   }
+
   // warn against non-primitive key
+  // key只能是简单类型不能是引用类型，否则会抛出警告
   if (process.env.NODE_ENV !== 'production' &&
     isDef(data) && isDef(data.key) && !isPrimitive(data.key)
   ) {
@@ -79,7 +84,9 @@ export function _createElement (
       )
     }
   }
+
   // support single function children as default scoped slot
+  // children的第一项是一个函数，则把第一项作为scopedSlots的值
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
   ) {
@@ -87,15 +94,21 @@ export function _createElement (
     data.scopedSlots = { default: children[0] }
     children.length = 0
   }
+
+  // 标准化children
   if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children)
   } else if (normalizationType === SIMPLE_NORMALIZE) {
     children = simpleNormalizeChildren(children)
   }
+
+
   let vnode, ns
+  // 如果tag是一个字符串
   if (typeof tag === 'string') {
     let Ctor
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
+    // 平台自带的标签
     if (config.isReservedTag(tag)) {
       // platform built-in elements
       if (process.env.NODE_ENV !== 'production' && isDef(data) && isDef(data.nativeOn)) {
@@ -108,8 +121,13 @@ export function _createElement (
         config.parsePlatformTagName(tag), data, children,
         undefined, undefined, context
       )
+      // 自定义组件
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
+      // Ctor --> 用户定义的options
+      // data --> 在模板上解析得到的属性、事件绑定...
+      // context --> 父组件上下文
+      // children --> 子组件
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements
@@ -128,6 +146,8 @@ export function _createElement (
     return vnode
   } else if (isDef(vnode)) {
     if (isDef(ns)) applyNS(vnode, ns)
+    // 深度监听 :style :class
+    // TODO: 在父组件作用域绑定的style和class需要监听
     if (isDef(data)) registerDeepBindings(data)
     return vnode
   } else {
