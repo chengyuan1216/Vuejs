@@ -84,6 +84,7 @@ export class Observer {
  * Augment a target Object or Array by intercepting
  * the prototype chain using __proto__
  */
+// 如果对象有__proto__, 则将对象的原型修改为加了拦截的数组原型
 function protoAugment (target, src: Object) {
   /* eslint-disable no-proto */
   target.__proto__ = src
@@ -95,6 +96,7 @@ function protoAugment (target, src: Object) {
  * hidden properties.
  */
 /* istanbul ignore next */
+// 如果不存在__proto__则， 将所有的方法定义在数组上面， 覆盖掉原有的方法
 function copyAugment (target: Object, src: Object, keys: Array<string>) {
   for (let i = 0, l = keys.length; i < l; i++) {
     const key = keys[i]
@@ -108,10 +110,12 @@ function copyAugment (target: Object, src: Object, keys: Array<string>) {
  * or the existing observer if the value already has one.
  */
 export function observe (value: any, asRootData: ?boolean): Observer | void {
+  // 基本类型和VNode return
   if (!isObject(value) || value instanceof VNode) {
     return
   }
   let ob: Observer | void
+  // 如果对象已监听
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__
   } else if (
@@ -139,9 +143,12 @@ export function defineReactive (
   customSetter?: ?Function,
   shallow?: boolean
 ) {
+  // 属性对应的dep对象
   const dep = new Dep()
 
+  // 属性本身也可能是一个访问器属性
   const property = Object.getOwnPropertyDescriptor(obj, key)
+  // 如果属性是不可配置的
   if (property && property.configurable === false) {
     return
   }
@@ -153,17 +160,20 @@ export function defineReactive (
     val = obj[key]
   }
 
+  // 如果是深度转化， 则会递归监听值
   let childOb = !shallow && observe(val)
   Object.defineProperty(obj, key, {
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      // 如果有getter则执行getter方法得到值
       const value = getter ? getter.call(obj) : val
+      // 如果是在wathcer内使用的，此时Dep.target上会引用当前wathcer对象
       if (Dep.target) {
-        dep.depend()
+        dep.depend() // 收集依赖
         if (childOb) {
-          childOb.dep.depend()
-          if (Array.isArray(value)) {
+          childOb.dep.depend() // 用于属性删除时
+          if (Array.isArray(value)) { // 如果是一个数组
             dependArray(value)
           }
         }
@@ -182,11 +192,13 @@ export function defineReactive (
       }
       // #7981: for accessor properties without setter
       if (getter && !setter) return
+      // computed属性
       if (setter) {
         setter.call(obj, newVal)
       } else {
         val = newVal
       }
+      // 监听新的值
       childOb = !shallow && observe(newVal)
       dep.notify()
     }
@@ -265,9 +277,11 @@ export function del (target: Array<any> | Object, key: any) {
  * Collect dependencies on array elements when the array is touched, since
  * we cannot intercept array element access like property getters.
  */
+// 遍历数组收集依赖
 function dependArray (value: Array<any>) {
   for (let e, i = 0, l = value.length; i < l; i++) {
     e = value[i]
+    //
     e && e.__ob__ && e.__ob__.dep.depend()
     if (Array.isArray(e)) {
       dependArray(e)

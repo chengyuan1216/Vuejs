@@ -26,6 +26,8 @@ methodsToPatch.forEach(function (method) {
   const original = arrayProto[method]
   def(arrayMethods, method, function mutator (...args) {
     const result = original.apply(this, args)
+    // 数组本身的observer属性
+    // 在observer的时候加上去的
     const ob = this.__ob__
     let inserted
     switch (method) {
@@ -39,6 +41,7 @@ methodsToPatch.forEach(function (method) {
     }
     if (inserted) ob.observeArray(inserted)
     // notify change
+    // 通知使用了数组的wathcer
     ob.dep.notify()
     return result
   })

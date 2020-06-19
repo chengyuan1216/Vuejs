@@ -70,7 +70,7 @@ export default class Watcher {
       this.deep = this.user = this.lazy = this.sync = false
     }
     this.cb = cb  // 回调
-    this.id = ++uid // uid for batching 
+    this.id = ++uid // uid for batching
     this.active = true // 当前watcher是否处于激活状态
     this.dirty = this.lazy // for lazy watchers
     this.deps = []  // 在执行get方法时收集的依赖
@@ -85,7 +85,7 @@ export default class Watcher {
       // 可能是userWatcher
       // 可能是renderWatcher
       // 可能是computedWatcher
-      this.getter = expOrFn 
+      this.getter = expOrFn
     } else {
       // 是userWatcher
       this.getter = parsePath(expOrFn)
