@@ -2,16 +2,21 @@
 
 import { isDef, isObject } from 'shared/util'
 
+// 根据vnode生成class
 export function genClassForVnode (vnode: VNodeWithData): string {
   let data = vnode.data
   let parentNode = vnode
   let childNode = vnode
+  // 如果这是一个自定义组件
   while (isDef(childNode.componentInstance)) {
+    // 找到组件的根节点
     childNode = childNode.componentInstance._vnode
+    // 将class合并
     if (childNode && childNode.data) {
       data = mergeClassData(childNode.data, data)
     }
   }
+  //
   while (isDef(parentNode = parentNode.parent)) {
     if (parentNode && parentNode.data) {
       data = mergeClassData(data, parentNode.data)

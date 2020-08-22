@@ -116,6 +116,7 @@ export function renderMixin (Vue: Class<Component>) {
           vnode = vm._vnode
         }
       } else {
+        // 如果render执行异常将使用上一次的vnode, 在patch的时候将不会在重新更新dom, 因为vnode并没有发生改变
         vnode = vm._vnode
       }
     } finally {
