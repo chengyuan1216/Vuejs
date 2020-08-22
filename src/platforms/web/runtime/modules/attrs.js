@@ -20,6 +20,7 @@ import {
 
 // 更新DOM attr
 function updateAttrs (oldVnode: VNodeWithData, vnode: VNodeWithData) {
+  // 创建组件vm的options对象
   const opts = vnode.componentOptions
   // 如果inheritAttrs的值设置为false, 组件上定义的属性将不会作用到根元素
   if (isDef(opts) && opts.Ctor.options.inheritAttrs === false) {

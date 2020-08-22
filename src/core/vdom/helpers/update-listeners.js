@@ -50,6 +50,8 @@ export function createFnInvoker (fns: Function | Array<Function>, vm: ?Component
   return invoker
 }
 
+
+// on 新的事件 old 旧的事件 add
 export function updateListeners (
   on: Object,
   oldOn: Object,
@@ -73,10 +75,12 @@ export function updateListeners (
         `Invalid handler for event "${event.name}": got ` + String(cur),
         vm
       )
-    } else if (isUndef(old)) {
+    } else if (isUndef(old)) { // 新添加的事件
+      // 如果没有定义回调函数
       if (isUndef(cur.fns)) {
         cur = on[name] = createFnInvoker(cur, vm)
       }
+      // 回调函数只执行一次
       if (isTrue(event.once)) {
         cur = on[name] = createOnceHandler(event.name, cur, event.capture)
       }
@@ -86,6 +90,8 @@ export function updateListeners (
       on[name] = old
     }
   }
+
+  // 遍历所有的旧的事件, 如果在新的事件中没有，则移出事件
   for (name in oldOn) {
     if (isUndef(on[name])) {
       event = normalizeEvent(name)

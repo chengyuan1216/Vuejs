@@ -11,10 +11,15 @@ import {
   genClassForVnode
 } from 'web/util/index'
 
+// 更新class
 function updateClass (oldVnode: any, vnode: any) {
   const el = vnode.elm
   const data: VNodeData = vnode.data
   const oldData: VNodeData = oldVnode.data
+  // staticClass ---> 静态样式class， 不绑定值， 不会发生改变
+  // class       ---> 动态样式class,  绑定值， 会改变
+
+  // 如果新旧vnode都没有class和staticClass，则不用patch class
   if (
     isUndef(data.staticClass) &&
     isUndef(data.class) && (
