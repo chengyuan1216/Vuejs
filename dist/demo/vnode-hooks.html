@@ -1,0 +1,69 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .hello {
+        background: #e0e0e0;
+        font-size: 12px;
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../vue.js"></script>
+    <script>
+    window.vm = new Vue({
+      el: '#app',
+      data() {
+        return {
+          msg: 1
+        }
+      },
+      methods: {
+        handleClick() {
+          console.log('click')
+          this.msg = 2
+        }
+      },
+      render(h) {
+        let vm = this
+        return h('div', {
+          hook: {
+            // 创建的时候调用的hook
+            create(oldVnode, vnode) {
+              //  这个时候已经根据vnode创建出dom节点了, 但是还未插入到父节点中去
+              console.log('create', oldVnode, vnode)
+              vnode.elm.style.cssText = 'color: red'
+            },
+            insert(oldVnode, vnode) {
+              console.log('insert', oldVnode, vnode)
+            },
+            // 更新时调用的 hook
+            prepatch(oldVnode, vnode) {
+              console.log('prepatch', oldVnode, vnode)
+            },
+            update(oldVnode, vnode) {
+              console.log('update', oldVnode, vnode)
+            },
+            postpatch(oldVnode, vnode) {
+              console.log('postpatch', oldVnode, vnode)
+            },
+            destroy(oldVnode, vnode) {
+              console.log('destroy', oldVnode, vnode)
+            },
+          },
+          on: {
+            click: () => {
+              debugger
+              vm._update(null, false)
+            }
+          }
+        }, this.msg)
+      }
+    })
+    </script>
+  </body>
+</html>

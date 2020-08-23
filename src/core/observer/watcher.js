@@ -194,9 +194,9 @@ export default class Watcher {
     /* istanbul ignore else */
     if (this.lazy) { // 如果是computed属性则改变dirty的值， 当再次访问computed的值得时候就会重新求值
       this.dirty = true
-    } else if (this.sync) { // 同步执行
+    } else if (this.sync) { // 同步执行 run
       this.run()
-    } else { // 通过异步队列的方式执行
+    } else { // 通过异步队列的方式执行 run
       queueWatcher(this)
     }
   }

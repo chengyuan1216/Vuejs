@@ -51,6 +51,7 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  debugger
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -87,6 +88,8 @@ export function _createElement (
 
   // support single function children as default scoped slot
   // children的第一项是一个函数，则把第一项作为scopedSlots的值
+  // 通过vue-compiler编译过后的slot是放在data上的, 所以当用户手写render的时候， 将方法作为children[0]传入时
+  // 这个函数将会被当作scopedSlot.default
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
   ) {
@@ -107,6 +110,7 @@ export function _createElement (
   // 如果tag是一个字符串
   if (typeof tag === 'string') {
     let Ctor
+    // 获取命名空间
     ns = (context.$vnode && context.$vnode.ns) || config.getTagNamespace(tag)
     // 平台自带的标签
     if (config.isReservedTag(tag)) {
@@ -124,10 +128,10 @@ export function _createElement (
       // 自定义组件
     } else if ((!data || !data.pre) && isDef(Ctor = resolveAsset(context.$options, 'components', tag))) {
       // component
-      // Ctor --> 用户定义的options
-      // data --> 在模板上解析得到的属性、事件绑定...
+      // Ctor --> 用于创建自定义组件的options ---> 子组件内部细节
+      // data --> 在模板上解析得到的属性、事件绑定...  ---> 子组件在父组件内使用时，由父组件传入的属性
       // context --> 父组件上下文
-      // children --> 子组件
+      // children --> 子组件的子组件
       vnode = createComponent(Ctor, data, context, children, tag)
     } else {
       // unknown or unlisted namespaced elements

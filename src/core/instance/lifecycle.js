@@ -78,15 +78,21 @@ export function lifecycleMixin (Vue: Class<Component>) {
       // updates
       vm.$el = vm.__patch__(prevVnode, vnode)
     }
+    // 在当前组件patch完成后, 将activeInstance恢复为上一个
     restoreActiveInstance()
+
+    // 根dom节点有一个属性 __vue__指向vm
     // update __vue__ reference
+    // 将上一个dom.__vue__清空， 避免循环引用
     if (prevEl) {
       prevEl.__vue__ = null
     }
+    // 新的dom.__vue__将会指向当前节点
     if (vm.$el) {
       vm.$el.__vue__ = vm
     }
     // if parent is an HOC, update its $el as well
+    // 高阶组件, 更新父组件的$el
     if (vm.$vnode && vm.$parent && vm.$vnode === vm.$parent._vnode) {
       vm.$parent.$el = vm.$el
     }

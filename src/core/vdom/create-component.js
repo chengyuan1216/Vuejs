@@ -33,6 +33,7 @@ import {
 } from 'weex/runtime/recycle-list/render-component-template'
 
 // inline hooks to be invoked on component VNodes during patch
+// patch一个自定义组件时需要使用到的hook
 const componentVNodeHooks = {
   init (vnode: VNodeWithData, hydrating: boolean): ?boolean {
     if (
@@ -183,6 +184,7 @@ export function createComponent (
   data.on = data.nativeOn
 
   // 抽象组件
+  // 抽象组件只能有slot，不能有其他属性
   if (isTrue(Ctor.options.abstract)) {
     // abstract components do not keep anything
     // other than props & listeners & slot
@@ -196,6 +198,7 @@ export function createComponent (
   }
 
   // install component management hooks onto the placeholder node
+  // 在data上加上hook
   installComponentHooks(data)
 
   // return a placeholder vnode

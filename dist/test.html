@@ -15,7 +15,6 @@
     <div id="app"></div>
     <script src="vue.js"></script>
     <script>
-      debugger
     var ComA = {
       props: {
         name: {
@@ -52,6 +51,7 @@
     Vue.component('com-a', ComA)
 
     var App = {
+      name: 'App',
       methods: {
         handleClick() {
           this.$emit('my-click')
@@ -92,3 +92,10 @@
     </script>
   </body>
 </html>
+
+<script>
+(function anonymous(
+) {
+with(this){return _c('App',{ref:"root",on:{"my-click":handleClick},scopedSlots:_u([{key:"default",fn:function(scope){return [_v("\n            "+_s(scope)+"\n          ")]}}])})}
+})
+</script>

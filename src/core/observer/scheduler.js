@@ -208,6 +208,7 @@ export function queueWatcher (watcher: Watcher) {
     if (!waiting) {
       waiting = true
 
+      // 用于测试同步执行队列
       if (process.env.NODE_ENV !== 'production' && !config.async) {
         flushSchedulerQueue()
         return
