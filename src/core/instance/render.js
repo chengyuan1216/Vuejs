@@ -79,6 +79,9 @@ export function renderMixin (Vue: Class<Component>) {
 
   Vue.prototype._render = function (): VNode {
     const vm: Component = this
+    // vnode 与 组件实例vm的联系
+    // vnode.componentInstance = vm
+    // vm.$options._parentVnode = vnode
     const { render, _parentVnode } = vm.$options
 
     if (_parentVnode) {

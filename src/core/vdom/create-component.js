@@ -134,6 +134,7 @@ export function createComponent (
   // 异步组件
   let asyncFactory
   // 如果构造函数上没有cid,则可能是异步组件
+  // TODO: 异步组件的逻辑
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor
     Ctor = resolveAsyncComponent(asyncFactory, baseCtor)
@@ -202,6 +203,8 @@ export function createComponent (
   installComponentHooks(data)
 
   // return a placeholder vnode
+  // 返回一个占位的vnode, 在父组件进行patch的时候, 会执行自定义组件Vnode的init hook
+  // 与普通dom元素的vnode不同的是， 组件的vnode会多一个componentOptions属性， 用来创建组件对象vm
   const name = Ctor.options.name || tag
   const vnode = new VNode(
     `vue-component-${Ctor.cid}${name ? `-${name}` : ''}`,
@@ -228,8 +231,8 @@ export function createComponentInstanceForVnode (
 ): Component {
   const options: InternalComponentOptions = {
     _isComponent: true, // 是否是自定义组件
-    _parentVnode: vnode, // 父Vnode
-    parent
+    _parentVnode: vnode, // 子组件的$Vnode
+    parent               //  父组件的实例vm
   }
   // check inline-template render functions
   // 是否是inline-template

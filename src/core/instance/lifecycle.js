@@ -39,6 +39,7 @@ export function initLifecycle (vm: Component) {
     while (parent.$options.abstract && parent.$parent) {
       parent = parent.$parent
     }
+    // $children 保存所有子组件
     parent.$children.push(vm)
   }
 

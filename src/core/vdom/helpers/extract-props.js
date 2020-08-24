@@ -10,6 +10,10 @@ import {
 } from 'core/util/index'
 
 /* 从VNodeData上获取props数据 */
+/*
+获取组件的props数据, 组件具体定义了那些属性, 可以通过Ctor.options.props获取，
+而属性值是从data.sttrs 和 data.props 上获取的。
+*/
 export function extractPropsFromVNodeData (
   data: VNodeData,
   Ctor: Class<Component>,
@@ -18,6 +22,7 @@ export function extractPropsFromVNodeData (
   // we are only extracting raw values here.
   // validation and default values are handled in the child
   // component itself.
+  // 如果Ctor.options.props不存在， 则表示组件未定义props, 不需要检查属性值
   const propOptions = Ctor.options.props
   if (isUndef(propOptions)) {
     return
@@ -50,6 +55,7 @@ export function extractPropsFromVNodeData (
   return res
 }
 
+// TODO
 function checkProp (
   res: Object,
   hash: ?Object,

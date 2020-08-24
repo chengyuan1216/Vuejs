@@ -146,6 +146,9 @@ export function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children)
   }
+
+  // TODO 这里什么情况下会返回一个数组？
+  // 如果返回的是一个数组， 在执行完_render之后其实也只是取数组中的第一个
   if (Array.isArray(vnode)) {
     return vnode
   } else if (isDef(vnode)) {

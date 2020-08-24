@@ -1,0 +1,4 @@
+1、异步组件处理逻辑
+2、v-model转化成属性和事件
+3、data.attrs 和 data.props
+4、函数式组件

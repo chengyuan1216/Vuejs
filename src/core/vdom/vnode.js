@@ -1,17 +1,17 @@
 /* @flow */
 
 export default class VNode {
-  tag: string | void;
-  data: VNodeData | void;
-  children: ?Array<VNode>;
-  text: string | void;
-  elm: Node | void;
-  ns: string | void;
-  context: Component | void; // rendered in this component's scope
-  key: string | number | void;
-  componentOptions: VNodeComponentOptions | void;
-  componentInstance: Component | void; // component instance
-  parent: VNode | void; // component placeholder node
+  tag: string | void;               // 组件或元素名称
+  data: VNodeData | void;           // 创建vnode时传入的数据， 这些数据是在父组件的模板上传进来的
+  children: ?Array<VNode>;          // 对于dom元素来说， 这里传入的就是子节点的vnode。对于自定义组件来说就是slot
+  text: string | void;              // 文本节点
+  elm: Node | void;                 // 真实的dom元素
+  ns: string | void;                // 命名空间， 比如svg
+  context: Component | void; // rendered in this component's scope   // 创建当前vnode所在的上下文， 即父组件实例
+  key: string | number | void;                                       //
+  componentOptions: VNodeComponentOptions | void;                    // 自定义组件才会用到
+  componentInstance: Component | void; // component instance         // 根据vnode生成的组件实例vm
+  parent: VNode | void; // component placeholder node                // 父vnode
 
   // strictly internal
   raw: boolean; // contains raw HTML? (server only)
