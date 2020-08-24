@@ -2,3 +2,4 @@
 2、v-model转化成属性和事件
 3、data.attrs 和 data.props
 4、函数式组件
+5、slot的渲染过程

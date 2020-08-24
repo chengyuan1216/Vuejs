@@ -69,6 +69,8 @@ const componentVNodeHooks = {
 
   insert (vnode: MountedComponentVNode) {
     const { context, componentInstance } = vnode
+    // 在子组件调用$mount成功后并不会触发 mounted 钩子, 只有根组件才会调用
+    // 子组件的mounted是在这里触发的
     if (!componentInstance._isMounted) {
       componentInstance._isMounted = true
       callHook(componentInstance, 'mounted')

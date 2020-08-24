@@ -268,13 +268,17 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 创建内部组件
   function initComponent (vnode, insertedVnodeQueue) {
+    // 将当前vnode收集的insertedVnodeQueue队列添加到全局的队列中
     if (isDef(vnode.data.pendingInsert)) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
+    //
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
+      // 调用
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
     } else {
@@ -345,7 +349,7 @@ export function createPatchFunction (backend) {
     return isDef(vnode.tag)
   }
 
-  // 根据vnode创建dom时， 调用 create 和 insert hook
+  // 根据vnode创建dom后， 调用 create 和 insert hook
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
     // vue 内置的
     for (let i = 0; i < cbs.create.length; ++i) {
@@ -358,6 +362,7 @@ export function createPatchFunction (backend) {
       // TODO: 为什么insert和create处理的逻辑不一样
       // 这里使用insertedVnodeQueue将所有需要调用inserthook的vnode收集起来
       // 在patch的逻辑处理完后, 遍历依次执行
+      // 子组件在根组件未将dom插入到文档中，是不会触发mounted钩子的。
       if (isDef(i.insert)) insertedVnodeQueue.push(vnode)
     }
   }
@@ -911,6 +916,7 @@ export function createPatchFunction (backend) {
       }
     }
 
+    // patch完成后触发insert hook
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }
