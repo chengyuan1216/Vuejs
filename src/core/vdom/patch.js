@@ -818,12 +818,13 @@ export function createPatchFunction (backend) {
 
     if (isUndef(oldVnode)) {
       // empty mount (likely as component), create new root element
+      // 比如： new Vue().$mount()
       isInitialPatch = true
       createElm(vnode, insertedVnodeQueue)
     } else {
       // 是否是一个DOM节点
       const isRealElement = isDef(oldVnode.nodeType)
-      if (!isRealElement && sameVnode(oldVnode, vnode)) {
+      if (!isRealElement && sameVnode(oldVnode, vnode)) { // 对已存在的vnode进行比对
         // patch existing root node
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {

@@ -14,6 +14,7 @@ export function initEvents (vm: Component) {
   vm._hasHookEvent = false
   // init parent attached events
   // _parentListeners对象保存了组件在父组件模板上注册的事件
+  // 组件定义的事件
   const listeners = vm.$options._parentListeners
   if (listeners) {
     updateComponentListeners(vm, listeners)

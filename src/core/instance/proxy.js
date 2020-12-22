@@ -68,7 +68,9 @@ if (process.env.NODE_ENV !== 'production') {
   const getHandler = {
     get (target, key) {
       if (typeof key === 'string' && !(key in target)) {
+        // 提示定义的data对象属性不能以_开头
         if (key in target.$data) warnReservedPrefix(target, key)
+        // 提示使用了未定义的变量
         else warnNonPresent(target, key)
       }
       return target[key]

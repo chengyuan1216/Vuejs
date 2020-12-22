@@ -237,7 +237,7 @@ export function createComponentInstanceForVnode (
     parent               //  父组件的实例vm
   }
   // check inline-template render functions
-  // 是否是inline-template
+  // 是否是inline-template, inline-template是在父作用域编译的, 生成的render方法将会赋值给子组options.render
   const inlineTemplate = vnode.data.inlineTemplate
   if (isDef(inlineTemplate)) {
     options.render = inlineTemplate.render

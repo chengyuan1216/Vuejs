@@ -28,7 +28,7 @@ export function initRender (vm: Component) {
   const renderContext = parentVnode && parentVnode.context
   // 获取到slot， slot是在父组件作用域编译的
   vm.$slots = resolveSlots(options._renderChildren, renderContext)
-  // 作用域slot
+  // 作用域slot在这里初始化为空对象， 真正获取是在执行render方法的时候
   vm.$scopedSlots = emptyObject
   // bind the createElement fn to this instance
   // so that we get proper render context inside it.
@@ -47,6 +47,8 @@ export function initRender (vm: Component) {
   const parentData = parentVnode && parentVnode.data
 
   /* istanbul ignore else */
+  // 在组件实例上定义react属性$attrs、$listeners
+  // 在vnode.data上定义的attrs属性将被转换成组件的react属性$attrs
   if (process.env.NODE_ENV !== 'production') {
     defineReactive(vm, '$attrs', parentData && parentData.attrs || emptyObject, () => {
       !isUpdatingChildComponent && warn(`$attrs is readonly.`, vm)

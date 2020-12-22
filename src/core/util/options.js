@@ -26,11 +26,13 @@ import {
  * how to merge a parent option value and a child option
  * value into the final value.
  */
+// 在对options进行合并时， 不同的字段的合并策略是不一样的
 const strats = config.optionMergeStrategies
 
 /**
  * Options with restrictions
  */
+// el、propsData这两个字段如果不是在调用构造函数时使用的将会报错
 if (process.env.NODE_ENV !== 'production') {
   strats.el = strats.propsData = function (parent, child, vm, key) {
     if (!vm) {
@@ -174,6 +176,7 @@ function dedupeHooks (hooks) {
   return res
 }
 
+// 声明周期的合并策略
 LIFECYCLE_HOOKS.forEach(hook => {
   strats[hook] = mergeHook
 })
@@ -199,7 +202,7 @@ function mergeAssets (
     return res
   }
 }
-
+// components、filter、directives的合并策略
 ASSET_TYPES.forEach(function (type) {
   strats[type + 's'] = mergeAssets
 })
@@ -393,6 +396,7 @@ function assertObjectType (name: string, value: any, vm: ?Component) {
  * Merge two option objects into a new one.
  * Core utility used in both instantiation and inheritance.
  */
+// 在Vue.extend和this._init内部都会调用
 export function mergeOptions (
   parent: Object,
   child: Object,
@@ -402,7 +406,9 @@ export function mergeOptions (
     checkComponents(child)
   }
 
-  /* 如果传入的是一个function类型， 则可能是一个构造函数 */
+  /*
+  如果传入的是一个function类型， 则可能是一个构造函数，在Vue.extend内部已经执行过一次mergeOptions了
+   */
   if (typeof child === 'function') {
     child = child.options
   }

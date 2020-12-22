@@ -42,6 +42,7 @@ export function normalizeScopedSlots (
     }
   }
   // expose normal slots on scopedSlots
+  // 将普通的slots代理到$scopedSlots上，
   for (const key in normalSlots) {
     if (!(key in res)) {
       res[key] = proxyNormalSlot(normalSlots, key)
@@ -58,6 +59,7 @@ export function normalizeScopedSlots (
   return res
 }
 
+// 对scopedSlot返回的vnode进行normalizeChildren处理
 function normalizeScopedSlot(normalSlots, key, fn) {
   const normalized = function () {
     let res = arguments.length ? fn.apply(null, arguments) : fn({})

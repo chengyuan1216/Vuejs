@@ -144,6 +144,7 @@ export function _createElement (
     }
   } else {
     // direct component options / constructor
+    // tag可能传入的是一个options对象或者Vue.extend()返回的构造函数
     vnode = createComponent(tag, data, context, children)
   }
 

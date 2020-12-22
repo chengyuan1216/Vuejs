@@ -41,6 +41,7 @@ Vue.prototype.__patch__ = inBrowser ? patch : noop
 /*
   在初始化完vm对象后, 开始将组建挂载到DOM树，
   此时created钩子已执行，beforeMount钩子未执行
+  给不带compiler的版本使用，带compiler的版本将会重写$mount
 */
 Vue.prototype.$mount = function (
   el?: string | Element,

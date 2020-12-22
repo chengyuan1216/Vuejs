@@ -65,7 +65,7 @@ export default class Watcher {
       this.user = !!options.user // 是否是用户定义的watcher
       this.lazy = !!options.lazy // 是否是延迟执行get方法，在需要使用get的返回值时才执行get方法
       this.sync = !!options.sync // 是否是同步执行get方法，computed和userWatcher都是同步执行，renderWatcher是异步执行
-      this.before = options.before
+      this.before = options.before // 在watcher进行update之前执行
     } else {
       this.deep = this.user = this.lazy = this.sync = false
     }

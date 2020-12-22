@@ -34,6 +34,7 @@ export function initLifecycle (vm: Component) {
 
   // locate first non-abstract parent
   // 找到最近的不是抽象组件的父级， 将vm对象加入到这个父级的$children数组中
+  // 将父子组件实例之间建立双向引用
   let parent = options.parent
   if (parent && !options.abstract) {
     while (parent.$options.abstract && parent.$parent) {
@@ -51,16 +52,17 @@ export function initLifecycle (vm: Component) {
   vm.$children = []
   vm.$refs = {}
 
-  vm._watcher = null
+  vm._watcher = null // 保存 render watcher
   vm._inactive = null
   vm._directInactive = false
-  vm._isMounted = false
-  vm._isDestroyed = false
-  vm._isBeingDestroyed = false
+  vm._isMounted = false // 标识是否已执行mounted
+  vm._isDestroyed = false // 标识是否已执行 destroyed
+  vm._isBeingDestroyed = false // 标识是否已执行 beforeDestroy
 }
 
 export function lifecycleMixin (Vue: Class<Component>) {
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
+    debugger
     const vm: Component = this
     const prevEl = vm.$el
     // 上一次生成的vnode
@@ -160,9 +162,10 @@ export function mountComponent (
   el: ?Element,
   hydrating?: boolean
 ): Component {
-  // $el可以访问dom
+  // $el可以访问dom，在执行$mount时传进来的
   vm.$el = el
 
+  // 如果render方法不存在则赋值一个返回空vnode节点的方法
   if (!vm.$options.render) {
     vm.$options.render = createEmptyVNode
     if (process.env.NODE_ENV !== 'production') {
@@ -229,7 +232,7 @@ export function mountComponent (
   // mounted is called for render-created child components in its inserted hook
   // 页面跟组件才会在patch的逻辑执行完后触发mounted钩子
   // 内部调用的子组件是通过调用vnode的insert hook来调用的。
-  // 只有页面的跟组件vm.$vnode才会为null
+  // 只有页面的根组件vm.$vnode才会为null
   if (vm.$vnode == null) {
     vm._isMounted = true
     callHook(vm, 'mounted')

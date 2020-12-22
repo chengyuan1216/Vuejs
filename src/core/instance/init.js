@@ -15,6 +15,10 @@ let uid = 0
 export function initMixin (Vue: Class<Component>) {
   // 在构造函数内部会执行
   /**
+  options有两种： 一种是用户外部定义的options， 一种是vue框架在patch的过程中内部创建的options
+  他们两者之间通过__isComponent属性来区分。
+  这两种options的数据结构是不一样的，在_init方法中只能直接使用外部定义的数据结构来创建组件实例，
+  所以内部会调用initInternalComponent方法来构造真正用来创建组件实例的options
   如果是vue内部通过vnode创建vm, 传入的options是这样的数据结构
   const options: InternalComponentOptions = {
     _isComponent: true, // 是否是自定义组件
@@ -48,7 +52,7 @@ export function initMixin (Vue: Class<Component>) {
     } else {
       // 通过合并策略得到最终的options
       vm.$options = mergeOptions(
-        resolveConstructorOptions(vm.constructor), /**从构造函数上获得的options */
+        resolveConstructorOptions(vm.constructor), /**从构造函数上获得的options, 即构造函数的属性options */
         options || {}, /**用户传入的options */
         vm
       )
@@ -94,6 +98,7 @@ export function initMixin (Vue: Class<Component>) {
 // vue内部调用构造函数创建vm对象时， 初始化options
 export function initInternalComponent (vm: Component, options: InternalComponentOptions) {
   // 继承自构造函数上的options，这是避免创建多个vm实例时相互干扰
+  // 获取$options，和外部options统一
   const opts = vm.$options = Object.create(vm.constructor.options)
   // doing this because it's faster than dynamic enumeration.
   const parentVnode = options._parentVnode
@@ -111,7 +116,7 @@ export function initInternalComponent (vm: Component, options: InternalComponent
   opts._renderChildren = vnodeComponentOptions.children
   opts._componentTag = vnodeComponentOptions.tag
 
-  // 获取render方法
+  // 当使用inline-template时render方法是在父作用域编译生成的
   if (options.render) {
     opts.render = options.render
     opts.staticRenderFns = options.staticRenderFns
@@ -167,6 +172,7 @@ export function resolveConstructorOptions (Ctor: Class<Component>) {
   return options
 }
 
+// 获取父级修改的options
 function resolveModifiedOptions (Ctor: Class<Component>): ?Object {
   let modified
   const latest = Ctor.options

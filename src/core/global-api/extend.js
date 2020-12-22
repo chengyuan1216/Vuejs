@@ -16,7 +16,8 @@ export function initExtend (Vue: GlobalAPI) {
   /**
    * Class inheritance
    * extendOptions: 定义的组件options
-   * 返回值是一个组件构造函数
+   * 返回值是一个组件构造函数，构造函数上的options将会保存合并后的options
+   *
    */
   Vue.extend = function (extendOptions: Object): Function {
     extendOptions = extendOptions || {}
@@ -32,6 +33,7 @@ export function initExtend (Vue: GlobalAPI) {
 
     // 组件的名称，即Vue.component的第一个参数
     const name = extendOptions.name || Super.options.name
+    // 非生产环境会对组件名称进行验证
     if (process.env.NODE_ENV !== 'production' && name) {
       validateComponentName(name)
     }
@@ -53,6 +55,7 @@ export function initExtend (Vue: GlobalAPI) {
       Super.options,
       extendOptions
     )
+    // 子构造函数对父构造函数的引用
     Sub['super'] = Super
 
     // For props and computed properties, we define the proxy getters on
@@ -85,8 +88,11 @@ export function initExtend (Vue: GlobalAPI) {
     // keep a reference to the super options at extension time.
     // later at instantiation we can check if Super's options have
     // been updated.
+    // superOptions保存父组件的options
     Sub.superOptions = Super.options
+    // 保存传入的options
     Sub.extendOptions = extendOptions
+    // 对Sub.options的一个浅拷贝
     Sub.sealedOptions = extend({}, Sub.options)
 
     // cache constructor

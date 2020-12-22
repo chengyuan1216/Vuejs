@@ -1,0 +1,120 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .hello {
+        background: #e0e0e0;
+        font-size: 12px;
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../vue.js"></script>
+    <script>
+    // 测试 mergeOptions
+    debugger
+    var CompA = {
+      data() {
+        return {
+          msg: 1
+        }
+      },
+      methods: {
+        handleClick1() {
+          this.msg = 2
+        }
+      },
+      template: `
+        <div>A</div>
+      `
+    }
+
+    var CompB = {
+      props: {
+        message: {
+          type:String
+        }
+      },
+      template: `
+        <div>
+          B {{message}}
+        </div>
+      `
+    }
+
+    var CompC = {
+      data() {
+        return {
+          msg: 1
+        }
+      },
+      methods: {
+        handleClick1() {
+          this.msg = 2
+        }
+      },
+      template: `
+        <div>
+          C
+          <slot name="header"></slot>
+          <slot name="footer" v-bind:scope="msg"></slot>
+        </div>
+      `
+    }
+    // function anonymous() {
+    //     with (this) {
+    //       return _c(
+    //         'div',
+    //         [
+    //           _v('\n          C\n          '),
+    //           _t('header'),
+    //           _v(' '),
+    //           _t('footer', null, { scope: msg }),
+    //         ],
+    //         2
+    //       )
+    //     }
+    //   }
+
+    window.vm = new Vue({
+      el: '#app',
+      components: {
+        CompA,
+        CompB,
+        CompC,
+      },
+      template: `
+        <CompC>
+          <CompA slot="header"></CompA>
+          <template slot="footer" slot-scope="scope">
+            <CompB></CompB>
+          </template>
+        </CompC>
+      `
+    })
+    // function anonymous() {
+    //     with (this) {
+    //       return _c(
+    //         'CompC',
+    //         {
+    //           scopedSlots: _u([
+    //             {
+    //               key: 'footer',
+    //               fn: function (scope) {
+    //                 return [_c('CompB')]
+    //               },
+    //             },
+    //           ]),
+    //         },
+    //         [_c('CompA', { attrs: { slot: 'header' }, slot: 'header' })],
+    //         1
+    //       )
+    //     }
+    //   }
+    </script>
+  </body>
+</html>
