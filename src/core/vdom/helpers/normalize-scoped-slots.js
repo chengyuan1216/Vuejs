@@ -42,7 +42,8 @@ export function normalizeScopedSlots (
     }
   }
   // expose normal slots on scopedSlots
-  // 将普通的slots代理到$scopedSlots上，
+  // 将普通的slots代理到$scopedSlots上，是为了和scopedSlot统一
+  // 在执行renderSlot方法时统一调用slot对应的方法返回vnode对象
   for (const key in normalSlots) {
     if (!(key in res)) {
       res[key] = proxyNormalSlot(normalSlots, key)

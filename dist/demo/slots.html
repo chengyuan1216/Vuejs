@@ -39,6 +39,9 @@
           type:String
         }
       },
+      mounted() {
+        console.log(this.message)
+      },
       template: `
         <div>
           B {{message}}
@@ -49,19 +52,19 @@
     var CompC = {
       data() {
         return {
-          msg: 1
+          msg: "1"
         }
       },
       methods: {
         handleClick1() {
-          this.msg = 2
+          this.msg = "2"
         }
       },
       template: `
         <div>
           C
           <slot name="header"></slot>
-          <slot name="footer" v-bind:scope="msg"></slot>
+          <slot name="footer" v-bind:message="msg"></slot>
         </div>
       `
     }
@@ -91,7 +94,7 @@
         <CompC>
           <CompA slot="header"></CompA>
           <template slot="footer" slot-scope="scope">
-            <CompB></CompB>
+            <CompB :message="scope.message"></CompB>
           </template>
         </CompC>
       `

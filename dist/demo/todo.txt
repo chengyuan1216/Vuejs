@@ -3,3 +3,4 @@
 3、data.attrs 和 data.props
 4、函数式组件
 5、slot的渲染过程
+6、styleScope

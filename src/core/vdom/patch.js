@@ -95,6 +95,7 @@ export function createPatchFunction (backend) {
     }
   */
  // vnode各个生命周期需要调用的hook
+ // 不同的平台下传入的 modules 和 nodeOps都不一样
   for (i = 0; i < hooks.length; ++i) {
     cbs[hooks[i]] = []
     for (j = 0; j < modules.length; ++j) {
@@ -249,16 +250,22 @@ export function createPatchFunction (backend) {
       // 执行VNode的init方法
       // 只有自定义组件才会在创建vnode的时候在data上安装init hook
       // 在init hook里面后会创建 componentInstance
+      /** init hook */
       if (isDef(i = i.hook) && isDef(i = i.init)) {
+        debugger
         i(vnode, false /* hydrating */)
+        // 这个时候组件已经$mount完成，此时还未执行组件的mounted生命周期
+        // $vnode对应生成的dom元素也还没有append到父组件的dom元素上
       }
       // after calling the init hook, if the vnode is a child component
       // it should've created a child instance and mounted it. the child
       // component also has set the placeholder vnode's elm.
       // in that case we can just return the element and be done.
-      // 如果是自定义组件将会进入下面的逻辑， 并且返回true
+      // 如果是自定义组件此时已经生成了组件实例componentInstance
       if (isDef(vnode.componentInstance)) {
+        debugger
         initComponent(vnode, insertedVnodeQueue)
+        // 将组件生成dom添加进入父组件的dom内， 但此时子组件还未执行mounted生命周期
         insert(parentElm, vnode.elm, refElm)
         if (isTrue(isReactivated)) {
           reactivateComponent(vnode, insertedVnodeQueue, parentElm, refElm)
@@ -268,17 +275,19 @@ export function createPatchFunction (backend) {
     }
   }
 
-  // 创建内部组件
+  // 内部组件创建完成后
   function initComponent (vnode, insertedVnodeQueue) {
     // 将当前vnode收集的insertedVnodeQueue队列添加到全局的队列中
     if (isDef(vnode.data.pendingInsert)) {
       insertedVnodeQueue.push.apply(insertedVnodeQueue, vnode.data.pendingInsert)
       vnode.data.pendingInsert = null
     }
-    //
+    // 将组件生成的dom元素挂到vnode上
     vnode.elm = vnode.componentInstance.$el
     if (isPatchable(vnode)) {
-      // 调用
+      // 调用 create hook， 此时会更新props、attrs、style、class、dom事件等到dom元素上
+      // 如果vnode上存在insert属性，会将vnode添加到insertedVnodeQueue
+      // 此时组件的dom还未添加到父组件的dom内
       invokeCreateHooks(vnode, insertedVnodeQueue)
       setScope(vnode)
     } else {
@@ -350,16 +359,16 @@ export function createPatchFunction (backend) {
   }
 
   // 根据vnode创建dom后， 调用 create 和 insert hook
+  // dom元素的属性，dom事件都是在vnode hooks里面加上的
   function invokeCreateHooks (vnode, insertedVnodeQueue) {
-    // vue 内置的
+    // create hook会更新dom元素的属性、事件等
     for (let i = 0; i < cbs.create.length; ++i) {
       cbs.create[i](emptyNode, vnode)
     }
-    // 用户自定义的
+    // 在创建组件的vnode时会加上hook
     i = vnode.data.hook // Reuse variable
     if (isDef(i)) {
       if (isDef(i.create)) i.create(emptyNode, vnode)
-      // TODO: 为什么insert和create处理的逻辑不一样
       // 这里使用insertedVnodeQueue将所有需要调用inserthook的vnode收集起来
       // 在patch的逻辑处理完后, 遍历依次执行
       // 子组件在根组件未将dom插入到文档中，是不会触发mounted钩子的。
@@ -918,6 +927,7 @@ export function createPatchFunction (backend) {
     }
 
     // patch完成后触发insert hook
+    // 包括在core模块定义的insert hook, 在这里将会执行组件的mounted生命周期
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }
