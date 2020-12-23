@@ -612,13 +612,14 @@ export function createPatchFunction (backend) {
       return
     }
 
-    // vnode列表
+    // 如果vnode上面已经存在了elm，说明这是重复使用的vnode
+    // 这种情况会复制一个新的vnode节点
     if (isDef(vnode.elm) && isDef(ownerArray)) {
       // clone reused vnode
       vnode = ownerArray[index] = cloneVNode(vnode)
     }
 
-    // 获取vnode对应的dom元素
+    // 复用之前的dom元素
     const elm = vnode.elm = oldVnode.elm
 
     // 异步组件
@@ -648,14 +649,16 @@ export function createPatchFunction (backend) {
 
     let i
     const data = vnode.data
-    // TODO: 自定义hook属性？prepatch
-    // prepatch、
+    // prepatch hook是在创建组件vnode时定义挂载上去的，非组件vnode没有
+    // vnode prepatch hook
+    // 把新的propsData和事件更新到$options上
     if (isDef(data) && isDef(i = data.hook) && isDef(i = i.prepatch)) {
       i(oldVnode, vnode)
     }
 
     const oldCh = oldVnode.children
     const ch = vnode.children
+    // 对vode节点本身更新， 如果是组件vnode将会把attrs、class、style等更新到根节点上
     if (isDef(data) && isPatchable(vnode)) {
       // 调用vnode的update hooks
       for (i = 0; i < cbs.update.length; ++i) cbs.update[i](oldVnode, vnode) // vue自己的
@@ -835,6 +838,7 @@ export function createPatchFunction (backend) {
       const isRealElement = isDef(oldVnode.nodeType)
       if (!isRealElement && sameVnode(oldVnode, vnode)) { // 对已存在的vnode进行比对
         // patch existing root node
+        // 对相同的节点进行比对
         patchVnode(oldVnode, vnode, insertedVnodeQueue, null, null, removeOnly)
       } else {
         // oldVnode是一个真实的dom节点， 这是第一次进行patch

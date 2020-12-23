@@ -51,6 +51,7 @@ export function _createElement (
   children?: any,
   normalizationType?: number
 ): VNode | Array<VNode> {
+  // vnode的data数据不能是react对象
   if (isDef(data) && isDef((data: any).__ob__)) {
     process.env.NODE_ENV !== 'production' && warn(
       `Avoid using observed data object as vnode data: ${JSON.stringify(data)}\n` +
@@ -89,6 +90,7 @@ export function _createElement (
   // children的第一项是一个函数，则把第一项作为scopedSlots的值
   // 通过vue-compiler编译过后的slot是放在data上的, 所以当用户手写render的时候， 将方法作为children[0]传入时
   // 这个函数将会被当作scopedSlot.default
+  // 比如使用jsx语法的时候，使用scopedSLot直接定义一个返回vnode的方法即可
   if (Array.isArray(children) &&
     typeof children[0] === 'function'
   ) {
@@ -98,6 +100,7 @@ export function _createElement (
   }
 
   // 标准化children
+  // 将多维数组扁平化成为一维数组
   if (normalizationType === ALWAYS_NORMALIZE) {
     children = normalizeChildren(children)
   } else if (normalizationType === SIMPLE_NORMALIZE) {
@@ -183,6 +186,7 @@ function applyNS (vnode, ns, force) {
 // ref #5318
 // necessary to ensure parent re-render when deep bindings like :style and
 // :class are used on slot nodes
+// slot上绑定的class和style???
 function registerDeepBindings (data) {
   if (isObject(data.style)) {
     traverse(data.style)

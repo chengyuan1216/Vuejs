@@ -6,11 +6,12 @@ import { extend, warn, isObject } from 'core/util/index'
  * Runtime helper for rendering <slot>
  */
 export function renderSlot (
-  name: string,
-  fallback: ?Array<VNode>,
+  name: string, // slot名称
+  fallback: ?Array<VNode>, // <slot name="header"></slot> 标签里定义的默认内容
   props: ?Object,
   bindObject: ?Object
 ): ?Array<VNode> {
+  // 这会挂载到原型上面，所以能访问到实例上的属性
   const scopedSlotFn = this.$scopedSlots[name]
   let nodes
   if (scopedSlotFn) { // scoped slot

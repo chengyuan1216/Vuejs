@@ -149,6 +149,8 @@ function flushSchedulerQueue () {
 // 调用所有watcher对应vm实例的updated钩子
 function callUpdatedHooks (queue) {
   let i = queue.length
+  // 按照从大到小的顺序调用watcher对应的组件的updated生命周期
+  // 排序后的wather保证了一定会先执行子组件的update，再执行父组件的update
   while (i--) {
     const watcher = queue[i]
     const vm = watcher.vm

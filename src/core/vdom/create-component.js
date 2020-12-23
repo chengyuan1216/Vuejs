@@ -46,6 +46,9 @@ const componentVNodeHooks = {
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
       // 创建组件实例
+      // 在组件的vnode init的时候会创建对应的组件实例
+      // init执行完也代表组件已经创建成功，dom已经在内存中创建出来了
+      // 真正执行mounted钩子是在根节点的dom元素生成后， 通过insertedVnodeQueue来批量执行的
       const child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode, // VNode节点对象
         activeInstance // 父组件实例
@@ -56,8 +59,11 @@ const componentVNodeHooks = {
   },
 
   prepatch (oldVnode: MountedComponentVNode, vnode: MountedComponentVNode) {
+    // 当vnode进行patch时会对上一次创建出来的组件实例进行复用
+    // 然后对组件的属性、事件、子节点进行更新
     const options = vnode.componentOptions
     const child = vnode.componentInstance = oldVnode.componentInstance
+    debugger
     updateChildComponent(
       child,
       options.propsData, // updated props
@@ -71,6 +77,9 @@ const componentVNodeHooks = {
     const { context, componentInstance } = vnode
     // 在子组件调用$mount成功后并不会触发 mounted 钩子, 只有根组件才会调用
     // 子组件的mounted是在这里触发的
+    // 这样可以保证在任何一个子组件的mounted里通过refs访问任何组件的实例都能有结果
+    // 假设是在$mount里调用mounted，此时子组件的下一个兄弟组件还未创建成功
+    // 这样的话是访问不到下一个兄弟组件的
     if (!componentInstance._isMounted) {
       componentInstance._isMounted = true
       callHook(componentInstance, 'mounted')
@@ -90,6 +99,7 @@ const componentVNodeHooks = {
   },
 
   destroy (vnode: MountedComponentVNode) {
+    // 当vnode节点销毁时对应的组件实例也会被销毁
     const { componentInstance } = vnode
     if (!componentInstance._isDestroyed) {
       if (!vnode.data.keepAlive) {

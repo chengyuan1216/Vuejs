@@ -257,8 +257,9 @@ export function updateChildComponent (
   // check if there are dynamic scopedSlots (hand-written or compiled but with
   // dynamic slot names). Static scoped slots compiled from template has the
   // "$stable" marker.
-  const newScopedSlots = parentVnode.data.scopedSlots
-  const oldScopedSlots = vm.$scopedSlots
+  const newScopedSlots = parentVnode.data.scopedSlots // 获取新的slot
+  const oldScopedSlots = vm.$scopedSlots // 老的slot
+  // 判断是否是动态的slot
   const hasDynamicScopedSlot = !!(
     (newScopedSlots && !newScopedSlots.$stable) ||
     (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
@@ -285,10 +286,12 @@ export function updateChildComponent (
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
+  // patch 子组件的时候修改$atrrs和$listeners将会触发子组件的renderWatcher
   vm.$attrs = parentVnode.data.attrs || emptyObject
   vm.$listeners = listeners || emptyObject
 
   // update props
+  // 更新组件属性
   if (propsData && vm.$options.props) {
     toggleObserving(false)
     const props = vm._props
@@ -304,6 +307,7 @@ export function updateChildComponent (
   }
 
   // update listeners
+  // 更新组件在父组件定义的事件
   listeners = listeners || emptyObject
   const oldListeners = vm.$options._parentListeners
   vm.$options._parentListeners = listeners
@@ -312,6 +316,7 @@ export function updateChildComponent (
   // resolve slots + force update if has children
   if (needsForceUpdate) {
     vm.$slots = resolveSlots(renderChildren, parentVnode.context)
+    // 本质是在修改组件的状态后调用$forceUpdate强制更新组件
     vm.$forceUpdate()
   }
 

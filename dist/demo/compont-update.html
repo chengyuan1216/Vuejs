@@ -1,0 +1,124 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .hello {
+        background: #e0e0e0;
+        font-size: 12px;
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../vue.js"></script>
+    <script>
+    // 测试 组件更新
+    var CompC = {
+      props: {
+        message: String
+      },
+      data() {
+        return {
+          msg: "1"
+        }
+      },
+      methods: {
+        handleClick1() {
+          this.msg = "2"
+        }
+      },
+      beforeUpdate() {
+        console.log('子 beforeUpdate')
+      },
+      updated() {
+        console.log('子 updated')
+      },
+      template: `
+        <div>
+          <div>hello</div>
+          <div>{{message}}</div>
+        </div>
+      `
+    }
+
+    window.vm = new Vue({
+      el: '#app',
+      components: {
+        CompC,
+      },
+      data() {
+        return {
+          msg: "1"
+        }
+      },
+      beforeUpdate() {
+        console.log('父 beforeUpdate')
+      },
+      updated() {
+        console.log('父 updated')
+      },
+      methods: {
+        change() {
+          this.msg = Math.random()+''
+        }
+      },
+      template: `
+        <div>
+          <button @click="change">change</button>
+          <CompC :message="msg"></CompC>
+        </div>
+      `
+    })
+    </script>
+
+    <!--
+      1、点击change按钮，触发click事件, 执行回调
+      2、给msg赋值，将会执行访问器属性msg的set方法
+      3、判断msg的新值和旧值是否相等，如果相等将return不作处理, 如果不相等则执行msg对应的Dep对象的notify方法
+      4、同步通知订阅了Dep的所有wathcer，即直接执行watcher对象的update方法。
+      5、在update内部，renderWatch是通过执行queueWatcher加入异步队列来更新的。
+      6、在queueWatcher内部会判断当前renderWatcher是否已经在队列中，如果已经在了则不加入。
+      7、如果异步队列还未开启任务，则使用nextTick开启一个新的异步任务来处理。
+      9、在nextTick开启的异步任务中执行flushSchedulerQueue
+      10、在flushSchedulerQueue内部按照watcher的id从小到大排序，
+        排序的作用是：
+        10-1. 父组件比子组件先创建所以父组件wathcer的id会比子组件的watcher的id小,因此会先执行父组件的wathcer
+        10-2. userWathcher会比renderWatcher先执行
+      11、遍历wathcer的队列， 对每一个wathcer进行处理。
+      12、执行renderWatcher的before方法， before方法内部执行beforeUpdate生命周期
+      13、执行watcher的run方法, run方法又执行了watcher的get方法， 其实就是执行了
+        () => {
+          vm._update(vm._render(), hydrating)
+        }
+      14、于是又重新生成Vnode, 对新旧Vnode进行patch
+      15、_render方法创建vnode的过程
+        15-1、创建文本节点， 内容是 'change'
+        15-2、创建button节点， 文本节点'change'将作为button节点的子节点
+        15-3、创建文本节点， 内容是 ''， 这是换行导致的
+        15-4、创建CompC节点
+          15-4-1、调用createElement
+          15-4-2、通过组件名称'CompC'获取到组件的options对象
+          15-4-2、调用createComponent, 内部调用父类extend(options)得到子类的组件构造方法
+          15-4-3、resolveConstructorOptions得到子组件的合并后的options，并且挂在子类构造函数的options属性上
+          15-4-4、extractPropsFromVNodeData获取CompC定义的props数据
+          15-4-5、installComponentHooks在vnode的data对象上添加hooks
+              0: "init"
+              1: "prepatch"
+              2: "insert"
+              3: "destroy"
+          15-4-6、创建div节点
+          15-4-6、创建完成
+      16、_update内部调用__patch对vnode进行patch, 调用patchVnode
+      17、首先对最外层div更新
+      18、对CompC进行patch
+        prepatch: 对子组件进行patch时会复用的之前的组件实例
+
+
+
+
+     -->
+  </body>
+</html>
