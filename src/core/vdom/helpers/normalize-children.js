@@ -37,6 +37,7 @@ export function normalizeChildren (children: any): ?Array<VNode> {
       : undefined
 }
 
+// 判断是否是文本节点
 function isTextNode (node): boolean {
   return isDef(node) && isDef(node.text) && isFalse(node.isComment)
 }

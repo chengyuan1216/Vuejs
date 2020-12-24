@@ -120,6 +120,7 @@ export function createComponent (
   children: ?Array<VNode>,
   tag?: string
 ): VNode | Array<VNode> | void {
+  debugger
   if (isUndef(Ctor)) {
     return
   }
@@ -128,6 +129,7 @@ export function createComponent (
   const baseCtor = context.$options._base
 
   // plain options object: turn it into a constructor
+  // 如果是一个对象，说明这是一个options, 通过extend继承得到一个新的子类构造函数
   if (isObject(Ctor)) {
     // 通过继承返回一个新的子类构造器
     Ctor = baseCtor.extend(Ctor)
@@ -145,7 +147,7 @@ export function createComponent (
   // async component
   // 异步组件
   let asyncFactory
-  // 如果构造函数上没有cid,则可能是异步组件
+  // 如果构造函数上没有cid,则是异步组件
   // TODO: 异步组件的逻辑
   if (isUndef(Ctor.cid)) {
     asyncFactory = Ctor

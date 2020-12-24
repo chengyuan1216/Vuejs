@@ -4,6 +4,7 @@ import { def } from 'core/util/lang'
 import { normalizeChildren } from 'core/vdom/helpers/normalize-children'
 import { emptyObject } from 'shared/util'
 
+// 处理slot
 export function normalizeScopedSlots (
   slots: { [key: string]: Function } | void,
   normalSlots: { [key: string]: Array<VNode> },

@@ -4,6 +4,7 @@ import VNode from '../vnode'
 import { createFnInvoker } from './update-listeners'
 import { remove, isDef, isUndef, isTrue } from 'shared/util'
 
+// 对vnode hook进行合并
 export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
   if (def instanceof VNode) {
     def = def.data.hook || (def.data.hook = {})
