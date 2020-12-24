@@ -231,7 +231,10 @@ export function createPatchFunction (backend) {
       if (process.env.NODE_ENV !== 'production' && data && data.pre) {
         creatingElmInVPre--
       }
-    } else if (isTrue(vnode.isComment)) { // 注释节点
+    } else if (isTrue(vnode.isComment)) {
+      // 注释节点, 渲染异步组件的时候， 如果组件还未被resolve, 此时也是被渲染成一个空的注释节点
+      // 这个空的注释节点只是一个占位符，等到异步组件被resolve的时候，父组件会进行forceUpdate
+      // 注释节点也会被替换成真正想要渲染的组件
       vnode.elm = nodeOps.createComment(vnode.text)
       insert(parentElm, vnode.elm, refElm)
     } else { // 文本节点
