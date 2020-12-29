@@ -31,6 +31,7 @@ export const transitionProps = {
 
 // in case the child is also an abstract component, e.g. <keep-alive>
 // we want to recursively retrieve the real component to be rendered
+// 得到真实的非abstract节点
 function getRealChild (vnode: ?VNode): ?VNode {
   const compOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
   if (compOptions && compOptions.Ctor.options.abstract) {
@@ -64,6 +65,7 @@ function placeholder (h: Function, rawChild: VNode): ?VNode {
   }
 }
 
+// 是否有父transition节点
 function hasParentTransition (vnode: VNode): ?boolean {
   while ((vnode = vnode.parent)) {
     if (vnode.data.transition) {
@@ -86,12 +88,14 @@ export default {
   abstract: true,
 
   render (h: Function) {
+    debugger
     let children: any = this.$slots.default
     if (!children) {
       return
     }
 
     // filter out text nodes (possible whitespaces)
+    // 过滤掉文本节点
     children = children.filter(isNotTextNode)
     /* istanbul ignore if */
     if (!children.length) {
@@ -99,6 +103,7 @@ export default {
     }
 
     // warn multiple elements
+    // 只支持单节点
     if (process.env.NODE_ENV !== 'production' && children.length > 1) {
       warn(
         '<transition> can only be used on a single element. Use ' +
@@ -110,6 +115,7 @@ export default {
     const mode: string = this.mode
 
     // warn invalid mode
+    // 验证mode的值
     if (process.env.NODE_ENV !== 'production' &&
       mode && mode !== 'in-out' && mode !== 'out-in'
     ) {

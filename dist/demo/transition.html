@@ -1,0 +1,31 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .fade-enter-active, .fade-leave-active {
+        transition: opacity .5s;
+      }
+      .fade-enter, .fade-leave-to  {
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <button v-on:click="show = !show">Toggle</button>
+      <transition name="fade"><p v-if="show" slot="default">hello</p></transition>
+    </div>
+    <script src="../vue.js"></script>
+    <script>
+    // 测试 组件更新
+    window.vm = new Vue({
+      el: '#app',
+      data: {
+        show: true
+      }
+    })
+    </script>
+  </body>
+</html>
