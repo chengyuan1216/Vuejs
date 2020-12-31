@@ -158,6 +158,7 @@ export function _createElement (
     if (isDef(ns)) applyNS(vnode, ns)
     // 深度监听 :style :class
     // TODO: 在父组件作用域绑定的style和class需要监听
+    // 原因在于 :style="{}" 或 :class="{}"
     if (isDef(data)) registerDeepBindings(data)
     return vnode
   } else {

@@ -1,0 +1,26 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      var i = 0
+      var app = document.querySelector('#app')
+      var data = Array(9999999).fill('范德萨发生的范德萨范德萨范德萨范德萨').join('') + 'end!!!!!'
+      function addText() {
+        Promise.resolve().then(() => {
+          var text = document.createTextNode(data.substr(i, 1000))
+          app.appendChild(text+'\n')
+          i = i + 100000
+          if(i < 9999999) {
+            addText()
+          }
+        })
+      }
+      addText()
+    </script>
+  </body>
+</html>
