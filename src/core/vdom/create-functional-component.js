@@ -118,6 +118,7 @@ export function createFunctionalComponent (
     Ctor
   )
 
+  // 函数式组件不支持template, 只支持render
   const vnode = options.render.call(null, renderContext._c, renderContext)
 
   if (vnode instanceof VNode) {
