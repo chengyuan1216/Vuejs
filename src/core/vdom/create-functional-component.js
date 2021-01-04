@@ -17,6 +17,7 @@ import {
   validateProp
 } from '../util/index'
 
+// 创建函数式组件上下文
 export function FunctionalRenderContext (
   data: VNodeData,
   props: Object,
@@ -101,6 +102,7 @@ export function createFunctionalComponent (
   const options = Ctor.options
   const props = {}
   const propOptions = options.props
+  // 函数式组件支持props
   if (isDef(propOptions)) {
     for (const key in propOptions) {
       props[key] = validateProp(key, propOptions, propsData || emptyObject)
