@@ -73,9 +73,10 @@ export function initState (vm: Component) {
 
 /**
   所有的props数据都会保存到vm._props上，然后vm通过代理vm._props，所以vm可直接访问vm._props上的属性
+  vm.$options.propsData --> vm._props --> vm.$props
  */
 function initProps (vm: Component, propsOptions: Object) {
-  // 可用于测试props的propsData
+  // 从vnode上获取的数据
   const propsData = vm.$options.propsData || {}
   const props = vm._props = {}
   // cache prop keys so that future props updates can iterate using Array
@@ -192,6 +193,7 @@ function initComputed (vm: Component, computed: Object) {
 
   for (const key in computed) {
     const userDef = computed[key]
+    // 如果是一个函数，这个函数将会作为getter
     const getter = typeof userDef === 'function' ? userDef : userDef.get
     if (process.env.NODE_ENV !== 'production' && getter == null) {
       warn(
@@ -202,6 +204,7 @@ function initComputed (vm: Component, computed: Object) {
 
     if (!isSSR) {
       // create internal watcher for the computed property.
+      // 每一个computed属性都会有一个对应的watcher实例
       watchers[key] = new Watcher(
         vm,
         getter || noop,
@@ -225,6 +228,7 @@ function initComputed (vm: Component, computed: Object) {
   }
 }
 
+// userDef.cache可以控制是否缓存computed属性的值
 export function defineComputed (
   target: any,
   key: string,
@@ -253,24 +257,37 @@ export function defineComputed (
       )
     }
   }
+  // 组件实例访问key其实访问的是对应watcher的value
   Object.defineProperty(target, key, sharedPropertyDefinition)
 }
 
+// 会对computed属性进行缓存
 function createComputedGetter (key) {
   return function computedGetter () {
+    // 访问computed属性时，其实访问的时内部watcher的值
     const watcher = this._computedWatchers && this._computedWatchers[key]
     if (watcher) {
+      // 如果Watcher的值需要重新计算时
+      // 在evaluate内部会执行用户定义的getter， 在getter内依赖的数据都会被watcher收集
       if (watcher.dirty) {
         watcher.evaluate()
       }
+      // 如果Dep.target存在的话， 可能是renderWathcer 也可能是computedWatcher、userWatcher
+      // 会将watcher收集的依赖同时被Dep.target收集
+      // 举个例子： computed属性a依赖 $data.b
+      // 在template中使用了a, 那么renderWatcher也会间接依赖$data.b
+      // 当$data.b的值变化时，会将watcher.dirty的值变成true
+      // 同时也会通知renderWatcher进行patch
       if (Dep.target) {
         watcher.depend()
       }
+      // 返回watcher的值
       return watcher.value
     }
   }
 }
 
+// 每次都会调用getter方法，不会对结果进行缓存
 function createGetterInvoker(fn) {
   return function computedGetter () {
     return fn.call(this, this)
@@ -301,10 +318,13 @@ function initMethods (vm: Component, methods: Object) {
         )
       }
     }
+    // 将定义的method内的this绑定为组件实例
     vm[key] = typeof methods[key] !== 'function' ? noop : bind(methods[key], vm)
   }
 }
 
+
+// 通过options配置的watch内部会调用$watch
 function initWatch (vm: Component, watch: Object) {
   for (const key in watch) {
     const handler = watch[key]
@@ -354,6 +374,9 @@ export function stateMixin (Vue: Class<Component>) {
       warn(`$props is readonly.`, this)
     }
   }
+  // $data和$props是定义在原型上的属性
+  // this.$data --> this._data
+  // this.$props --> this._props --> propsData
   Object.defineProperty(Vue.prototype, '$data', dataDef)
   Object.defineProperty(Vue.prototype, '$props', propsDef)
 
@@ -372,6 +395,7 @@ export function stateMixin (Vue: Class<Component>) {
     options = options || {}
     options.user = true
     const watcher = new Watcher(vm, expOrFn, cb, options)
+    // 是否立即执行回调函数
     if (options.immediate) {
       try {
         cb.call(vm, watcher.value)
