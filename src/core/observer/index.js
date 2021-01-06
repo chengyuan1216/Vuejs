@@ -41,17 +41,23 @@ export class Observer {
 
   constructor (value: any) {
     this.value = value
+    // 在对数组进行监听时会使用到
     this.dep = new Dep()
     this.vmCount = 0
     def(value, '__ob__', this)
+    // 数组
     if (Array.isArray(value)) {
+      // 是否能使用__proto__
       if (hasProto) {
+        // 通过__proto__属性来修改 数组的原型
         protoAugment(value, arrayMethods)
       } else {
+        // 否则直接在数组上重写方法
         copyAugment(value, arrayMethods, arrayKeys)
       }
       this.observeArray(value)
     } else {
+      // 普通对象
       this.walk(value)
     }
   }
@@ -61,6 +67,7 @@ export class Observer {
    * getter/setters. This method should only be called when
    * value type is Object.
    */
+  // 遍历对象上的所有属性，转换成get、set
   walk (obj: Object) {
     const keys = Object.keys(obj)
     for (let i = 0; i < keys.length; i++) {
@@ -71,6 +78,7 @@ export class Observer {
   /**
    * Observe a list of Array items.
    */
+  // 对数组的每一项进行observe
   observeArray (items: Array<any>) {
     for (let i = 0, l = items.length; i < l; i++) {
       observe(items[i])
@@ -125,6 +133,10 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
     Object.isExtensible(value) &&
     !value._isVue
   ) {
+    // shouldObserve直接用来控制是否转换成reactive对象
+    // 只有数组或普通对象才会
+    // isExtensible 对象可扩展的，是否可以填加新的属性
+    // 不能是vue实例
     ob = new Observer(value)
   }
   if (asRootData && ob) {
@@ -137,8 +149,8 @@ export function observe (value: any, asRootData: ?boolean): Observer | void {
  * Define a reactive property on an Object.
  */
 export function defineReactive (
-  obj: Object,
-  key: string,
+  obj: Object, // 普通对象
+  key: string, // 属性
   val: any,
   customSetter?: ?Function,
   shallow?: boolean
@@ -156,6 +168,11 @@ export function defineReactive (
   // cater for pre-defined getter/setters
   const getter = property && property.get
   const setter = property && property.set
+
+  // getter不存在  setter不存在  普通属性
+  // getter不存在  setter存在    访问器属性
+  // getter存在    setter存在    访问器属性
+  // 即：当只存在getter时并且只有两个参数
   if ((!getter || setter) && arguments.length === 2) {
     val = obj[key]
   }
@@ -166,14 +183,15 @@ export function defineReactive (
     enumerable: true,
     configurable: true,
     get: function reactiveGetter () {
+      debugger
       // 如果有getter则执行getter方法得到值
       const value = getter ? getter.call(obj) : val
       // 如果是在wathcer内使用的，此时Dep.target上会引用当前wathcer对象
       if (Dep.target) {
         dep.depend() // 收集依赖
-        if (childOb) {
+        if (childOb) { // 值是一个对象或数组时
           childOb.dep.depend() // 用于属性删除时
-          if (Array.isArray(value)) { // 如果是一个数组
+          if (Array.isArray(value)) { // 如果是一个数组, 将会使得数组的每一项都会进行依赖收集
             dependArray(value)
           }
         }
@@ -217,16 +235,21 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
   ) {
     warn(`Cannot set reactive property on undefined, null, or primitive value: ${(target: any)}`)
   }
+  // 修改数组的指定项其实也是调用的splice方法来实现的
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key)
+    // 在重写的splice方法里会通过target.__ob__.dep.notify()来通知watcher
     target.splice(key, 1, val)
     return val
   }
+  // target是普通对象并且不存在属性key
   if (key in target && !(key in Object.prototype)) {
     target[key] = val
     return val
   }
   const ob = (target: any).__ob__
+
+  // 不能对组件实例或者组件的$data进行set
   if (target._isVue || (ob && ob.vmCount)) {
     process.env.NODE_ENV !== 'production' && warn(
       'Avoid adding reactive properties to a Vue instance or its root $data ' +
@@ -234,11 +257,17 @@ export function set (target: Array<any> | Object, key: any, val: any): any {
     )
     return val
   }
+
+  // 如果对项本身不是reactive对象，直接return
   if (!ob) {
     target[key] = val
     return val
   }
+
+  // 对新加的属性进行处理
   defineReactive(ob.value, key, val)
+
+  // 通知watch
   ob.dep.notify()
   return val
 }

@@ -1,0 +1,57 @@
+<!doctype html>
+<html data-framework="vue">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+    <style>
+      .hello {
+        background: #e0e0e0;
+        font-size: 12px;
+        display: inline;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script src="../vue.js"></script>
+    <script>
+
+    var arr = []
+    Object.defineProperty(arr, 0, {
+      value: 123
+    })
+    window.arr = arr
+    window.vm = new Vue({
+      el: '#app',
+      data() {
+        return {
+          msg: "hello",
+          a: {
+            b: 1
+          }
+        }
+      },
+      beforeUpdate() {
+        console.log("beforeUpdate")
+      },
+      updated() {
+        console.log("updated")
+      },
+      methods: {
+        change1() {
+          this.a.b = 2
+        },
+        change2() {
+          debugger
+          this.$set(this.a, 'c', 2)
+        }
+      },
+      template: `<div>
+        <button @click="change1">按钮1</button>
+        <button @click="change2">按钮2</button>
+        {{msg}}
+      </div>`
+    })
+    </script>
+  </body>
+</html>

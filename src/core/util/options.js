@@ -213,6 +213,7 @@ ASSET_TYPES.forEach(function (type) {
  * Watchers hashes should not overwrite one
  * another, so we merge them as arrays.
  */
+// 如果有相同的字段则会将回调函数合并成一个数组
 strats.watch = function (
   parentVal: ?Object,
   childVal: ?Object,

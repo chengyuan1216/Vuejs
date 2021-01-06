@@ -30,6 +30,7 @@ methodsToPatch.forEach(function (method) {
     // 在observer的时候加上去的
     const ob = this.__ob__
     let inserted
+    // 通过重写方法来实现监听数组的变化
     switch (method) {
       case 'push':
       case 'unshift':
