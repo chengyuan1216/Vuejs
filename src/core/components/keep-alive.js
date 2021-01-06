@@ -82,7 +82,9 @@ export default {
 
   render () {
     const slot = this.$slots.default
+    // 获取第一个组件vnode
     const vnode: VNode = getFirstComponentChild(slot)
+    // 获取vnode对应的组件options
     const componentOptions: ?VNodeComponentOptions = vnode && vnode.componentOptions
     if (componentOptions) {
       // check pattern
@@ -98,14 +100,19 @@ export default {
       }
 
       const { cache, keys } = this
+
+      // 获取key
       const key: ?string = vnode.key == null
         // same constructor may get registered as different local components
         // so cid alone is not enough (#3269)
         ? componentOptions.Ctor.cid + (componentOptions.tag ? `::${componentOptions.tag}` : '')
         : vnode.key
+
+      //  获取缓存的组件实例
       if (cache[key]) {
         vnode.componentInstance = cache[key].componentInstance
         // make current key freshest
+        // 先移除再添加
         remove(keys, key)
         keys.push(key)
       } else {
