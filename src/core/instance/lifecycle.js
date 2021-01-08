@@ -368,14 +368,17 @@ export function deactivateChildComponent (vm: Component, direct?: boolean) {
 
 export function callHook (vm: Component, hook: string) {
   // #7573 disable dep collection when invoking lifecycle hooks
+  // 调用生命周期函数时， 不进行依赖收集
   pushTarget()
   const handlers = vm.$options[hook]
   const info = `${hook} hook`
+  // 调用通过options定义的hook
   if (handlers) {
     for (let i = 0, j = handlers.length; i < j; i++) {
       invokeWithErrorHandling(handlers[i], vm, null, vm, info)
     }
   }
+  // 通过触发事件的方式调用， eg: hook:beforeCreate
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook)
   }

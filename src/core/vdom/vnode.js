@@ -8,7 +8,7 @@ export default class VNode {
   elm: Node | void;                 // 真实的dom元素
   ns: string | void;                // 命名空间， 比如svg
   context: Component | void; // rendered in this component's scope   // 创建当前vnode所在的上下文， 即父组件实例
-  key: string | number | void;                                       //
+  key: string | number | void;                                       // 唯一标示， tag一样key不一样时认为是两个不同的VNode
   componentOptions: VNodeComponentOptions | void;                    // 自定义组件才会用到
   componentInstance: Component | void; // component instance         // 根据vnode生成的组件实例vm
   parent: VNode | void; // component placeholder node                // 父vnode
