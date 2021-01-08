@@ -51,6 +51,7 @@ function markStatic (node: ASTNode) {
     for (let i = 0, l = node.children.length; i < l; i++) {
       const child = node.children[i]
       markStatic(child)
+      // 如果child不是静态节点，那么父节点也不是
       if (!child.static) {
         node.static = false
       }
@@ -97,6 +98,7 @@ function markStaticRoots (node: ASTNode, isInFor: boolean) {
   }
 }
 
+// 判断是不是静态节点
 function isStatic (node: ASTNode): boolean {
   if (node.type === 2) { // expression
     return false

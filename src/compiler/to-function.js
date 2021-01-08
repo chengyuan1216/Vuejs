@@ -26,6 +26,11 @@ export function createCompileToFunctionFn (compile: Function): Function {
     options?: CompilerOptions,
     vm?: Component
   ): CompiledFunctionResult {
+    // comments: undefined
+    // delimiters: undefined
+    // outputSourceRange: true
+    // shouldDecodeNewlines: false
+    // shouldDecodeNewlinesForHref: false
     options = extend({}, options)
     const warn = options.warn || baseWarn
     delete options.warn
@@ -49,6 +54,7 @@ export function createCompileToFunctionFn (compile: Function): Function {
     }
 
     // check cache
+    // 检查缓存， 如果有缓存则使用缓存
     const key = options.delimiters
       ? String(options.delimiters) + template
       : template

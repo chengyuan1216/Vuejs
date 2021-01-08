@@ -14,16 +14,25 @@ import { isNonPhrasingTag } from 'web/compiler/util'
 import { unicodeRegExp } from 'core/util/lang'
 
 // Regular Expressions for parsing tags and attributes
+// https://jex.im/regulex 正则分析工具
+// 任意个空格 + (属性名) +
 const attribute = /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+// 动态属性 v-bind:  @ : # 等
 const dynamicArgAttribute = /^\s*((?:v-[\w-]+:|@|:|#)\[[^=]+\][^\s"'<>\/=]*)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+)))?/
+// 字母下划线开头
 const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
+//
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
+// 匹配开始标签的结束   >
 const startTagClose = /^\s*(\/?)>/
 const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+// 文档类型
 const doctype = /^<!DOCTYPE [^>]+>/i
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
+// 注释
 const comment = /^<!\--/
+// 条件注释
 const conditionalComment = /^<!\[/
 
 // Special Elements (can contain anything)
@@ -63,8 +72,10 @@ export function parseHTML (html, options) {
     // Make sure we're not in a plaintext content element like script/style
     if (!lastTag || !isPlainTextElement(lastTag)) {
       let textEnd = html.indexOf('<')
+      // 第一个字符是<, 可能是开始标签或者结束标签
       if (textEnd === 0) {
         // Comment:
+        // 注释 <!--
         if (comment.test(html)) {
           const commentEnd = html.indexOf('-->')
 
@@ -78,6 +89,7 @@ export function parseHTML (html, options) {
         }
 
         // http://en.wikipedia.org/wiki/Conditional_comment#Downlevel-revealed_conditional_comment
+        // 条件注释
         if (conditionalComment.test(html)) {
           const conditionalEnd = html.indexOf(']>')
 
@@ -88,6 +100,7 @@ export function parseHTML (html, options) {
         }
 
         // Doctype:
+        // 文档类型
         const doctypeMatch = html.match(doctype)
         if (doctypeMatch) {
           advance(doctypeMatch[0].length)
@@ -95,6 +108,7 @@ export function parseHTML (html, options) {
         }
 
         // End tag:
+        // 结束标签
         const endTagMatch = html.match(endTag)
         if (endTagMatch) {
           const curIndex = index
@@ -104,6 +118,7 @@ export function parseHTML (html, options) {
         }
 
         // Start tag:
+        // 开始标签
         const startTagMatch = parseStartTag()
         if (startTagMatch) {
           handleStartTag(startTagMatch)
@@ -114,6 +129,7 @@ export function parseHTML (html, options) {
         }
       }
 
+      // 第一个字符是不是<并且存在<, 可能是开始标签和结束标签之间的内容
       let text, rest, next
       if (textEnd >= 0) {
         rest = html.slice(textEnd)
@@ -132,6 +148,7 @@ export function parseHTML (html, options) {
         text = html.substring(0, textEnd)
       }
 
+      // 已经不存在<了， 则剩下的只能是标签的内容
       if (textEnd < 0) {
         text = html
       }
@@ -179,18 +196,20 @@ export function parseHTML (html, options) {
   // Clean up any remaining tags
   parseEndTag()
 
+  // 截取字符串
   function advance (n) {
     index += n
     html = html.substring(n)
   }
 
+  // 解析开始标签
   function parseStartTag () {
     const start = html.match(startTagOpen)
     if (start) {
       const match = {
-        tagName: start[1],
-        attrs: [],
-        start: index
+        tagName: start[1], // 标签名
+        attrs: [],  // 属性
+        start: index // 位置
       }
       advance(start[0].length)
       let end, attr
@@ -200,15 +219,17 @@ export function parseHTML (html, options) {
         attr.end = index
         match.attrs.push(attr)
       }
+      // 如果开始标签是以/>结尾的表示这是一个闭标签
       if (end) {
-        match.unarySlash = end[1]
+        match.unarySlash = end[1] // 如果是img等闭标签则会有值
         advance(end[0].length)
-        match.end = index
+        match.end = index // 结束的位置
         return match
       }
     }
   }
 
+  // 对解析得到的开始标签信息进行二次处理
   function handleStartTag (match) {
     const tagName = match.tagName
     const unarySlash = match.unarySlash
@@ -242,6 +263,7 @@ export function parseHTML (html, options) {
       }
     }
 
+    // 如果不是闭标签则会作为下一个父标签
     if (!unary) {
       stack.push({ tag: tagName, lowerCasedTag: tagName.toLowerCase(), attrs: attrs, start: match.start, end: match.end })
       lastTag = tagName
@@ -252,6 +274,7 @@ export function parseHTML (html, options) {
     }
   }
 
+  // 解析闭合标签
   function parseEndTag (tagName, start, end) {
     let pos, lowerCasedTagName
     if (start == null) start = index

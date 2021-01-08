@@ -12,10 +12,27 @@ export const createCompiler = createCompilerCreator(function baseCompile (
   template: string,
   options: CompilerOptions
 ): CompiledResult {
+  // 将html template转换成ast
+  // {
+  //   attrsList: [],
+  //   attrsMap: {},
+  //   children:  [],
+  //   end: 66,
+  //   parent: undefined,
+  //   plain: true,
+  //   rawAttrsMap: {},
+  //   start: 0,
+  //   tag: "div",
+  //   type: 1
+  // }
   const ast = parse(template.trim(), options)
+
+  // 对ast进行优化
   if (options.optimize !== false) {
     optimize(ast, options)
   }
+
+  // 根据ast生成render函数代码
   const code = generate(ast, options)
   return {
     ast,
