@@ -210,6 +210,8 @@ export function parse (
     shouldDecodeNewlinesForHref: options.shouldDecodeNewlinesForHref,
     shouldKeepComment: options.comments,
     outputSourceRange: options.outputSourceRange,
+
+    // 解析开始标签的回调
     start (tag, attrs, unary, start, end) {
       // check namespace.
       // inherit parent ns if there is one
@@ -249,6 +251,7 @@ export function parse (
         })
       }
 
+      // 禁止的标签比如script、style
       if (isForbiddenTag(element) && !isServerRendering()) {
         element.forbidden = true
         process.env.NODE_ENV !== 'production' && warn(
@@ -264,6 +267,7 @@ export function parse (
         element = preTransforms[i](element, options) || element
       }
 
+      // 处理 pre标签
       if (!inVPre) {
         processPre(element)
         if (element.pre) {
@@ -277,26 +281,34 @@ export function parse (
         processRawAttrs(element)
       } else if (!element.processed) {
         // structural directives
+        // 处理v-for
         processFor(element)
+        // 处理v-if
         processIf(element)
+        // 处理v-once
         processOnce(element)
       }
 
+      // 设置根节点
       if (!root) {
         root = element
         if (process.env.NODE_ENV !== 'production') {
+          // 检查根节点 根节点不能是template、slot标签、或者使用了v-for
           checkRootConstraints(root)
         }
       }
 
+      // 如果不是闭标签，则当前标签会加入stack
       if (!unary) {
         currentParent = element
         stack.push(element)
       } else {
+        // 如果是闭标签，
         closeElement(element)
       }
     },
 
+    // 解析闭合标签的回调
     end (tag, start, end) {
       const element = stack[stack.length - 1]
       // pop stack
@@ -308,7 +320,9 @@ export function parse (
       closeElement(element)
     },
 
+    // 处理文本内容
     chars (text: string, start: number, end: number) {
+      // 检查当前父标签
       if (!currentParent) {
         if (process.env.NODE_ENV !== 'production') {
           if (text === template) {
@@ -357,6 +371,8 @@ export function parse (
         }
         let res
         let child: ?ASTNode
+        // 解析文本
+        // 1、如果存在插值
         if (!inVPre && text !== ' ' && (res = parseText(text, delimiters))) {
           child = {
             type: 2,
@@ -365,6 +381,7 @@ export function parse (
             text
           }
         } else if (text !== ' ' || !children.length || children[children.length - 1].text !== ' ') {
+          // 2、如果不存在插值
           child = {
             type: 3,
             text
@@ -379,6 +396,8 @@ export function parse (
         }
       }
     },
+
+    // 处理注释
     comment (text: string, start, end) {
       // adding anyting as a sibling to the root node is forbidden
       // comments should still be allowed, but ignored

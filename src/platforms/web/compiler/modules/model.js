@@ -23,6 +23,7 @@ import {
   createASTElement
 } from 'compiler/parser/index'
 
+// 对使用了v-model的input标签进行预处理
 function preTransformNode (el: ASTElement, options: CompilerOptions) {
   if (el.tag === 'input') {
     const map = el.attrsMap
@@ -31,6 +32,7 @@ function preTransformNode (el: ASTElement, options: CompilerOptions) {
     }
 
     let typeBinding
+    // 动态绑定type
     if (map[':type'] || map['v-bind:type']) {
       typeBinding = getBindingAttr(el, 'type')
     }
