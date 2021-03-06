@@ -269,6 +269,7 @@ function createComputedGetter (key) {
     if (watcher) {
       // 如果Watcher的值需要重新计算时
       // 在evaluate内部会执行用户定义的getter， 在getter内依赖的数据都会被watcher收集
+      // computed手机依赖
       if (watcher.dirty) {
         watcher.evaluate()
       }
@@ -279,6 +280,9 @@ function createComputedGetter (key) {
       // 当$data.b的值变化时，会将watcher.dirty的值变成true
       // 同时也会通知renderWatcher进行patch
       if (Dep.target) {
+        // 将computed收集到的依赖给使用了这个computed属性的Watcher也弄一份
+        // 所以当computed属性的依赖发生变化时，computedWatcher的dirty值变成true, 但式不会立马重新求值
+        // 同时也会通知到使用了这个computed属性的watcher（比如renderWatcher），在执行renderWatcher时使用到这个computed属性时才会重新求值。
         watcher.depend()
       }
       // 返回watcher的值

@@ -60,7 +60,9 @@ export function initLifecycle (vm: Component) {
   vm._isBeingDestroyed = false // 标识是否已执行 beforeDestroy
 }
 
+// 与组件生命周期相关
 export function lifecycleMixin (Vue: Class<Component>) {
+  // 组件更新
   Vue.prototype._update = function (vnode: VNode, hydrating?: boolean) {
     debugger
     const vm: Component = this
@@ -103,6 +105,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     // updated in a parent's updated hook.
   }
 
+  // 强制重新渲染
   Vue.prototype.$forceUpdate = function () {
     const vm: Component = this
     if (vm._watcher) {
@@ -110,6 +113,7 @@ export function lifecycleMixin (Vue: Class<Component>) {
     }
   }
 
+  // 销毁组件
   Vue.prototype.$destroy = function () {
     const vm: Component = this
     if (vm._isBeingDestroyed) {

@@ -101,7 +101,9 @@ export function nextTick (cb?: Function, ctx?: Object) {
       _resolve(ctx)
     }
   })
-  // 如果还未开启
+  // 如果还未开启，就启动
+  // 当上一轮异步任务队列开始执行以后pending的值会变成false
+  // 此时需要重新开启一个异步任务来执行任务队列
   if (!pending) {
     pending = true
     timerFunc()
