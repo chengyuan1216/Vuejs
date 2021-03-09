@@ -13,13 +13,16 @@ export function normalizeScopedSlots (
   let res
   // $slot上本来有的数据
   const hasNormalSlots = Object.keys(normalSlots).length > 0
-  // ?
+  // slots是否稳定？
+  // 1、传入的slots有$stable标识
+  // 2、vm.$slots不存在
   const isStable = slots ? !!slots.$stable : !hasNormalSlots
   const key = slots && slots.$key
 
   // 如果slots不存在
   if (!slots) {
     res = {}
+  // 如果_normalized == true表示slots已经处理过了，直接返回
   } else if (slots._normalized) {
     // fast path 1: child component re-render only, parent did not change
     return slots._normalized

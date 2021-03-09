@@ -158,7 +158,7 @@ export function createPatchFunction (backend) {
     index
   ) {
     // 如果是更新children, ownerArray是传入的children数组
-    // 如果vnode.elm已存在，则clone一个vnode
+    // 如果vnode.elm已存在，说明之前已经patch过了，为了避免覆盖，则clone一个vnode
     if (isDef(vnode.elm) && isDef(ownerArray)) {
       // This vnode was used in a previous render!
       // now it's used as a new node, overwriting its elm would cause
@@ -822,7 +822,7 @@ export function createPatchFunction (backend) {
   return function patch (oldVnode, vnode, hydrating, removeOnly) {
     // 如果vnode为空
     if (isUndef(vnode)) {
-      // 则销毁oldVnode
+      // 则销毁oldVnode, 调用vnode的destroy hook
       if (isDef(oldVnode)) invokeDestroyHook(oldVnode)
       return
     }
