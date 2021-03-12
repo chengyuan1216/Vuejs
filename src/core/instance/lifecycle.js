@@ -300,11 +300,14 @@ export function updateChildComponent (
     // these are also reactive so they may trigger child update if the child
     // used them during render
     // patch 子组件的时候修改$atrrs和$listeners将会触发子组件的renderWatcher
+    // $attrs 每次都是赋值一个新的对象
     vm.$attrs = parentVnode.data.attrs || emptyObject;
     vm.$listeners = listeners || emptyObject;
 
     // update props
     // 更新组件属性
+    // vm._props上的属性都是reactive属性
+    // 所以当prop改变重新赋值时会触发子组件的renderWacther
     if (propsData && vm.$options.props) {
         toggleObserving(false);
         const props = vm._props;

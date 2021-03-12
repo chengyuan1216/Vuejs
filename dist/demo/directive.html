@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html data-framework="vue">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <style>
+            .hello {
+                background: #e0e0e0;
+                font-size: 12px;
+                display: inline;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../vue.js"></script>
+        <script>
+            new Vue({
+                el: '#app',
+                directives: {
+                    show1: {
+                        insert(el, binding, vnode, oldVnode) {
+                            console.log('insert');
+                        },
+                        update(el, binding, vnode, oldVnode) {
+                            console.log('update');
+                        },
+                    },
+                },
+                data() {
+                    return {
+                        msg: 1,
+                    };
+                },
+                methods: {
+                    handleClick() {
+                        this.msg = +new Date();
+                    },
+                },
+                template: `
+                  <div @click="handleClick" v-show1="msg">{{msg}}</div>
+                  `,
+            });
+        </script>
+    </body>
+</html>
