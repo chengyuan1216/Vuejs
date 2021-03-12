@@ -251,82 +251,93 @@ export function updateChildComponent (
   parentVnode: MountedComponentVNode,
   renderChildren: ?Array<VNode>
 ) {
-  if (process.env.NODE_ENV !== 'production') {
-    isUpdatingChildComponent = true
-  }
-
-  // determine whether component has slot children
-  // we need to do this before overwriting $options._renderChildren.
-
-  // check if there are dynamic scopedSlots (hand-written or compiled but with
-  // dynamic slot names). Static scoped slots compiled from template has the
-  // "$stable" marker.
-  const newScopedSlots = parentVnode.data.scopedSlots // 获取新的slot
-  const oldScopedSlots = vm.$scopedSlots // 老的slot
-  // 判断是否是动态的slot
-  const hasDynamicScopedSlot = !!(
-    (newScopedSlots && !newScopedSlots.$stable) ||
-    (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) ||
-    (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
-  )
-
-  // Any static slot children from the parent may have changed during parent's
-  // update. Dynamic scoped slots may also have changed. In such cases, a forced
-  // update is necessary to ensure correctness.
-  const needsForceUpdate = !!(
-    renderChildren ||               // has new static slots
-    vm.$options._renderChildren ||  // has old static slots
-    hasDynamicScopedSlot
-  )
-
-  vm.$options._parentVnode = parentVnode
-  vm.$vnode = parentVnode // update vm's placeholder node without re-render
-
-  if (vm._vnode) { // update child tree's parent
-    vm._vnode.parent = parentVnode
-  }
-  vm.$options._renderChildren = renderChildren
-
-  // update $attrs and $listeners hash
-  // these are also reactive so they may trigger child update if the child
-  // used them during render
-  // patch 子组件的时候修改$atrrs和$listeners将会触发子组件的renderWatcher
-  vm.$attrs = parentVnode.data.attrs || emptyObject
-  vm.$listeners = listeners || emptyObject
-
-  // update props
-  // 更新组件属性
-  if (propsData && vm.$options.props) {
-    toggleObserving(false)
-    const props = vm._props
-    const propKeys = vm.$options._propKeys || []
-    for (let i = 0; i < propKeys.length; i++) {
-      const key = propKeys[i]
-      const propOptions: any = vm.$options.props // wtf flow?
-      props[key] = validateProp(key, propOptions, propsData, vm)
+    if (process.env.NODE_ENV !== 'production') {
+        isUpdatingChildComponent = true;
     }
-    toggleObserving(true)
-    // keep a copy of raw propsData
-    vm.$options.propsData = propsData
-  }
 
-  // update listeners
-  // 更新组件在父组件定义的事件
-  listeners = listeners || emptyObject
-  const oldListeners = vm.$options._parentListeners
-  vm.$options._parentListeners = listeners
-  updateComponentListeners(vm, listeners, oldListeners)
+    // determine whether component has slot children
+    // we need to do this before overwriting $options._renderChildren.
 
-  // resolve slots + force update if has children
-  if (needsForceUpdate) {
-    vm.$slots = resolveSlots(renderChildren, parentVnode.context)
-    // 本质是在修改组件的状态后调用$forceUpdate强制更新组件
-    vm.$forceUpdate()
-  }
+    // check if there are dynamic scopedSlots (hand-written or compiled but with
+    // dynamic slot names). Static scoped slots compiled from template has the
+    // "$stable" marker.
+    // data.scopedSlots可能是以jsx的方式传进来的
+    const newScopedSlots = parentVnode.data.scopedSlots; // 获取新的slot
+    const oldScopedSlots = vm.$scopedSlots; // 老的slot
+    // 判断是否是动态的slot
+    const hasDynamicScopedSlot = !!(
+        (
+            (newScopedSlots && !newScopedSlots.$stable) || // newScopedSlots是不稳定的
+            (oldScopedSlots !== emptyObject && !oldScopedSlots.$stable) || // oldScopedSlots是不稳定的
+            (newScopedSlots && vm.$scopedSlots.$key !== newScopedSlots.$key)
+        ) // $key不一样
+    );
 
-  if (process.env.NODE_ENV !== 'production') {
-    isUpdatingChildComponent = false
-  }
+    // Any static slot children from the parent may have changed during parent's
+    // update. Dynamic scoped slots may also have changed. In such cases, a forced
+    // update is necessary to ensure correctness.
+    // 当chilen或者动态scoped变化时需要强制update
+    const needsForceUpdate = !!(
+        renderChildren || // has new static slots
+        vm.$options._renderChildren || // has old static slots
+        hasDynamicScopedSlot
+    );
+
+    // 当前组件节点
+    vm.$options._parentVnode = parentVnode;
+    vm.$vnode = parentVnode; // update vm's placeholder node without re-render
+
+    // 内部根节点
+    if (vm._vnode) {
+        // update child tree's parent
+        vm._vnode.parent = parentVnode;
+    }
+
+    // 在tempalate中开标签和闭标签之间传入的chuilren
+    vm.$options._renderChildren = renderChildren;
+
+    // update $attrs and $listeners hash
+    // these are also reactive so they may trigger child update if the child
+    // used them during render
+    // patch 子组件的时候修改$atrrs和$listeners将会触发子组件的renderWatcher
+    vm.$attrs = parentVnode.data.attrs || emptyObject;
+    vm.$listeners = listeners || emptyObject;
+
+    // update props
+    // 更新组件属性
+    if (propsData && vm.$options.props) {
+        toggleObserving(false);
+        const props = vm._props;
+        const propKeys = vm.$options._propKeys || [];
+        for (let i = 0; i < propKeys.length; i++) {
+            const key = propKeys[i];
+            const propOptions: any = vm.$options.props; // wtf flow?
+            props[key] = validateProp(key, propOptions, propsData, vm);
+        }
+        toggleObserving(true);
+        // keep a copy of raw propsData
+        vm.$options.propsData = propsData;
+    }
+
+    // update listeners
+    // 更新组件在父组件定义的事件
+    listeners = listeners || emptyObject;
+    const oldListeners = vm.$options._parentListeners;
+    vm.$options._parentListeners = listeners;
+    updateComponentListeners(vm, listeners, oldListeners);
+
+    // resolve slots + force update if has children
+    // 虽然修改$ttrs和$listeners的时候可能会触发renderWatcher，但是不排除不触发或者根本没有定义$attrs和$listeners的组件
+    // 此时需要强制更新
+    if (needsForceUpdate) {
+        vm.$slots = resolveSlots(renderChildren, parentVnode.context);
+        // 本质是在修改组件的状态后调用$forceUpdate强制更新组件
+        vm.$forceUpdate();
+    }
+
+    if (process.env.NODE_ENV !== 'production') {
+        isUpdatingChildComponent = false;
+    }
 }
 
 function isInInactiveTree (vm) {
