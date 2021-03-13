@@ -353,6 +353,7 @@ export function createPatchFunction (backend) {
   }
 
   // 是否可patch
+  // 如果组件的_vnode.tag存在， 也就是template的根节点存在，那么这个组件vnode就是patchable
   function isPatchable (vnode) {
     // vnode.componentInstance存在的话表示这是一个自定义组件
     // 自定义组件就找到_vnode(即组件模板的根节点)的tag
@@ -694,13 +695,20 @@ export function createPatchFunction (backend) {
     }
   }
 
-  // 调用inserthook
+  // 收集需要延迟执行生命周期mounted的子组件
+  // 当根组件patch完成后会执行这个队列中每一个vnode的insertHook
   function invokeInsertHook (vnode, queue, initial) {
     // delay insert hooks for component root nodes, invoke them after the
     // element is really inserted
+    // 延迟执行组件的mounted事件在所有dom元素插入到文档之后，确保在mounted中能访问到dom元素
+    // 只有根组件的mounted事件是在自己patch完成后执行的
+    // 内组件不是这样的，虽然内部组件patch完成后dom元素已经生成了并且插入到了父节点中
+    // 但是mounted生命周期是延迟执行的。
     if (isTrue(initial) && isDef(vnode.parent)) {
+      // 将当前vnode的插入队列放到父组件的pendingInsert上
       vnode.parent.data.pendingInsert = queue
     } else {
+      // 遍历vnode队列，执行vonde.data.hook.insert
       for (let i = 0; i < queue.length; ++i) {
         queue[i].data.hook.insert(queue[i])
       }
@@ -895,6 +903,7 @@ export function createPatchFunction (backend) {
         )
 
         // update parent placeholder node element, recursively
+        // ???
         if (isDef(vnode.parent)) {
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
