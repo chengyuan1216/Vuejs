@@ -19,8 +19,8 @@ function updateDirectives (oldVnode: VNodeWithData, vnode: VNodeWithData) {
 }
 
 function _update (oldVnode, vnode) {
-  const isCreate = oldVnode === emptyNode
-  const isDestroy = vnode === emptyNode
+  const isCreate = oldVnode === emptyNode // 创建
+  const isDestroy = vnode === emptyNode // 销毁
   const oldDirs = normalizeDirectives(oldVnode.data.directives, oldVnode.context)
   const newDirs = normalizeDirectives(vnode.data.directives, vnode.context)
 
@@ -31,7 +31,7 @@ function _update (oldVnode, vnode) {
   for (key in newDirs) {
     oldDir = oldDirs[key]
     dir = newDirs[key]
-    if (!oldDir) {
+    if (!oldDir) { // 如果oldDir不存在，则可能是刚创建
       // new directive, bind
       callHook(dir, 'bind', vnode, oldVnode)
       if (dir.def && dir.def.inserted) {
@@ -93,17 +93,21 @@ function normalizeDirectives (
   let i, dir
   for (i = 0; i < dirs.length; i++) {
     dir = dirs[i]
+    // 修饰符
     if (!dir.modifiers) {
       // $flow-disable-line
       dir.modifiers = emptyModifiers
     }
+    // 数组
     res[getRawDirName(dir)] = dir
+    // 获取指令的定义对象，依次从本地、全局查找
     dir.def = resolveAsset(vm.$options, 'directives', dir.name, true)
   }
   // $flow-disable-line
   return res
 }
 
+// 获取指令名称
 function getRawDirName (dir: VNodeDirective): string {
   return dir.rawName || `${dir.name}.${Object.keys(dir.modifiers || {}).join('.')}`
 }
