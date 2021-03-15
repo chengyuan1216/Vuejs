@@ -3,6 +3,7 @@
 /**
  * Runtime helper for rendering static trees.
  */
+// 渲染静态节点
 export function renderStatic (
   index: number,
   isInFor: boolean
@@ -53,6 +54,7 @@ function markStatic (
   }
 }
 
+// 标记为静态节点
 function markStaticNode (node, key, isOnce) {
   node.isStatic = true
   node.key = key

@@ -3,6 +3,7 @@
 import config from 'core/config'
 import { hyphenate } from 'shared/util'
 
+// key未匹配
 function isKeyNotMatch<T> (expect: T | Array<T>, actual: T): boolean {
   if (Array.isArray(expect)) {
     return expect.indexOf(actual) === -1

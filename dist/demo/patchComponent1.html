@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html data-framework="vue">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <style>
+            .hello {
+                background: #e0e0e0;
+                font-size: 12px;
+                display: inline;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../vue.js"></script>
+        <script>
+            new Vue({
+                el: '#app',
+                data() {
+                    return {
+                        msg: 1,
+                    };
+                },
+                methods: {
+                    handleClick() {
+                        this.msg = Math.random();
+                        console.log('sss', this.msg);
+                    },
+                },
+                render(h) {
+                    let _this = this;
+                    if (this.msg > 0.5) {
+                        return h(
+                            'div',
+                            {
+                                on: {
+                                    click: this.handleClick,
+                                },
+                            },
+                            [h('div', null, this.msg), h('input')]
+                        );
+                    }
+
+                    return h(
+                        'p',
+                        {
+                            on: {
+                                click: this.handleClick,
+                            },
+                        },
+                        [h('div', null, this.msg), h('input')]
+                    );
+                },
+            });
+        </script>
+    </body>
+</html>

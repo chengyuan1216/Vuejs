@@ -1,5 +1,6 @@
 /* @flow */
 
+// 获取作用域插槽
 export function resolveScopedSlots (
   fns: ScopedSlotsData, // see flow/vnode
   res?: Object,
@@ -7,6 +8,7 @@ export function resolveScopedSlots (
   hasDynamicKeys?: boolean,
   contentHashKey?: number
 ): { [key: string]: Function, $stable: boolean } {
+  // hasDynamicKeys为false时则表示稳定的
   res = res || { $stable: !hasDynamicKeys }
   for (let i = 0; i < fns.length; i++) {
     const slot = fns[i]
