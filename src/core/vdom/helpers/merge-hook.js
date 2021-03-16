@@ -6,6 +6,7 @@ import { remove, isDef, isUndef, isTrue } from 'shared/util'
 
 // 对vnode hook进行合并
 export function mergeVNodeHook (def: Object, hookKey: string, hook: Function) {
+  // 如果def是一个vnode对象
   if (def instanceof VNode) {
     def = def.data.hook || (def.data.hook = {})
   }

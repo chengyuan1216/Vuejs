@@ -371,6 +371,8 @@ export function createPatchFunction (backend) {
       cbs.create[i](emptyNode, vnode)
     }
     // 在创建组件的vnode时会加上hook
+    // 1-自定义组件自带的hook
+    // 2-merge hook
     i = vnode.data.hook // Reuse variable
     if (isDef(i)) {
       if (isDef(i.create)) i.create(emptyNode, vnode)
@@ -439,7 +441,7 @@ export function createPatchFunction (backend) {
         if (isDef(ch.tag)) {
           removeAndInvokeRemoveHook(ch)
           invokeDestroyHook(ch)
-        } else { // Text node
+        } else { // Text node 移除文本节点
           removeNode(ch.elm)
         }
       }
@@ -450,6 +452,7 @@ export function createPatchFunction (backend) {
   function removeAndInvokeRemoveHook (vnode, rm) {
     if (isDef(rm) || isDef(vnode.data)) {
       let i
+      // listeners用来保证所有remove hook执行完后才会removeNode
       const listeners = cbs.remove.length + 1
       if (isDef(rm)) {
         // we have a recursively passed down rm callback
@@ -935,6 +938,7 @@ export function createPatchFunction (backend) {
 
         // destroy old node
         // 这个时候页面内旧的节点 和 新新创建的节点都会存在, 需要把他销毁
+        // parentElm存在的时候会多一步remove
         if (isDef(parentElm)) {
           removeVnodes([oldVnode], 0, 0)
         } else if (isDef(oldVnode.tag)) {
@@ -944,7 +948,8 @@ export function createPatchFunction (backend) {
     }
 
     // patch完成后触发insert hook
-    // 包括在core模块定义的insert hook, 在这里将会执行组件的mounted生命周期
+    // 1、包括在core模块定义的insert hook, 在这里将会执行组件的mounted生命周期
+    // 2、自定义指令定义了inserted时，也是放在这里执行
     invokeInsertHook(vnode, insertedVnodeQueue, isInitialPatch)
     return vnode.elm
   }

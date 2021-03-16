@@ -19,11 +19,20 @@
                 el: '#app',
                 directives: {
                     show1: {
-                        insert(el, binding, vnode, oldVnode) {
-                            console.log('insert');
+                        bind(el, binding, vnode, oldVnode) {
+                            console.log('bind', el, binding, vnode, oldVnode);
+                        },
+                        inserted(el, binding, vnode, oldVnode) {
+                            console.log('inserted', el, binding, vnode, oldVnode);
                         },
                         update(el, binding, vnode, oldVnode) {
-                            console.log('update');
+                            console.log('update', el, binding, vnode, oldVnode);
+                        },
+                        componentUpdated(el, binding, vnode, oldVnode) {
+                            console.log('componentUpdated', el, binding, vnode, oldVnode);
+                        },
+                        unbind(el, binding, vnode, oldVnode) {
+                            console.log('unbind', el, binding, vnode, oldVnode);
                         },
                     },
                 },
@@ -37,6 +46,17 @@
                         this.msg = +new Date();
                     },
                 },
+                // {
+                //     "directives": [
+                //       {
+                //         "name": "show1",
+                //         "rawName": "v-show1",
+                //         "value": 1,
+                //         "expression": "msg"
+                //       }
+                //     ],
+                //     "on": {}
+                //   }
                 template: `
                   <div @click="handleClick" v-show1="msg">{{msg}}</div>
                   `,
