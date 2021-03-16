@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html data-framework="vue">
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <style>
+            .hello {
+                background: #e0e0e0;
+                font-size: 12px;
+                display: inline;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script src="../vue.js"></script>
+        <script>
+            new Vue({
+                el: '#app',
+                data() {
+                    return {
+                      value: 1
+                    };
+                },
+                // 默认是在input事件
+                // _c('input',{
+                //      directives:[{name:"model",rawName:"v-model",value:(this.value),expression:"value"}],
+                //      domProps:{"value":(this.value)},
+                //      on:{
+                //        "input":function($event){if($event.target.composing)return;this.value=$event.target.value}
+                //      }
+                //  })
+
+                // 加了lazy之后是在change事件里修改value的值
+                // c('input',{directives:[{name:"model",rawName:"v-model.lazy",value:(value),expression:"value",modifiers:{"lazy":true}}],domProps:{"value":(value)},on:{"change":function($event){value=$event.target.value}}})
+                template: `<input v-model.lazy="value"/>`,
+            });
+        </script>
+    </body>
+</html>

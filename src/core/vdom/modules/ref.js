@@ -20,20 +20,28 @@ export default {
   }
 }
 
+// 注册ref
 export function registerRef (vnode: VNodeWithData, isRemoval: ?boolean) {
+  // 获取ref
   const key = vnode.data.ref
+  // 如果ref是空
   if (!isDef(key)) return
 
+  // 创建vnode的上下文，也就是父组件
   const vm = vnode.context
+  // vnode的组件实例或者dom元素
   const ref = vnode.componentInstance || vnode.elm
   const refs = vm.$refs
   if (isRemoval) {
+    // 删除ref
+    // v-for时是一个数组
     if (Array.isArray(refs[key])) {
       remove(refs[key], ref)
     } else if (refs[key] === ref) {
       refs[key] = undefined
     }
   } else {
+    // 添加ref
     // for循环中使用ref
     if (vnode.data.refInFor) {
       if (!Array.isArray(refs[key])) {

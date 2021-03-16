@@ -8,6 +8,7 @@ const whitespaceRE = /\s+/
  */
 export function addClass (el: HTMLElement, cls: ?string) {
   /* istanbul ignore if */
+  // cls为空或者只有空格
   if (!cls || !(cls = cls.trim())) {
     return
   }

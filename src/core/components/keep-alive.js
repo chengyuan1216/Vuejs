@@ -124,6 +124,7 @@ export default {
         }
       }
 
+      // 在这里给子组件标记了keepAlive，当重新进行createComponent时，就会复用之前的组件实例
       vnode.data.keepAlive = true
     }
     return vnode || (slot && slot[0])

@@ -110,6 +110,7 @@ export function createPatchFunction (backend) {
     return new VNode(nodeOps.tagName(elm).toLowerCase(), {}, [], undefined, elm)
   }
 
+  // 保证vnode在所有remove hook执行完后才被移除
   function createRmCb (childElm, listeners) {
     function remove () {
       if (--remove.listeners === 0) {
@@ -129,6 +130,7 @@ export function createPatchFunction (backend) {
     }
   }
 
+  // 未知的element
   function isUnknownElement (vnode, inVPre) {
     return (
       !inVPre &&

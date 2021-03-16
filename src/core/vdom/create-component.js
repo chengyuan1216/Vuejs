@@ -44,6 +44,7 @@ const componentVNodeHooks = {
       // kept-alive components, treat as a patch
       // 如果是使用了keepAlive的组件，则会复用上一次的组件实例
       const mountedNode: any = vnode // work around flow
+      // 并且进行prepatch
       componentVNodeHooks.prepatch(mountedNode, mountedNode)
     } else {
       // 创建组件实例
@@ -261,7 +262,7 @@ export function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
-// 安装VNode hooks
+// 自定义组件安装VNode hooks
 function installComponentHooks (data: VNodeData) {
   const hooks = data.hook || (data.hook = {})
   for (let i = 0; i < hooksToMerge.length; i++) {
