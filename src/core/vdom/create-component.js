@@ -104,9 +104,11 @@ const componentVNodeHooks = {
     // 当vnode节点销毁时对应的组件实例也会被销毁
     const { componentInstance } = vnode
     if (!componentInstance._isDestroyed) {
+      // 如果不是keep-alive组件， 直接销毁组件
       if (!vnode.data.keepAlive) {
         componentInstance.$destroy()
       } else {
+        // keep-alive组件
         deactivateChildComponent(componentInstance, true /* direct */)
       }
     }

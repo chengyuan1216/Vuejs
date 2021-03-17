@@ -368,6 +368,7 @@ export function activateChildComponent (vm: Component, direct?: boolean) {
   }
 }
 
+// keep-alive 组件
 export function deactivateChildComponent (vm: Component, direct?: boolean) {
   if (direct) {
     vm._directInactive = true
