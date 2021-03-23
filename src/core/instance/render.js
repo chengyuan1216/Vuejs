@@ -39,6 +39,8 @@ export function initRender (vm: Component) {
   // normalization is always applied for the public version, used in
   // user-written render functions.
   // 用户使用
+  // 每一个实例的$createElement都不一样，创建出来的vnode都绑定了vm
+  // 用来辨别是在哪个作用域下创建的vnode
   vm.$createElement = (a, b, c, d) => createElement(vm, a, b, c, d, true)
 
   // $attrs & $listeners are exposed for easier HOC creation.

@@ -908,7 +908,12 @@ export function createPatchFunction (backend) {
         )
 
         // update parent placeholder node element, recursively
-        // ???
+        // 当vnode是组件的根节点时， vnode.parent其实就是$vnode
+        // 比如下面的例子：当由CompA切换到CompB时， CompB是重新创建的，所以需要将CompA销毁
+        // <template>
+        //   <CompA v-if="c"></CompA>
+        //   <CompB v-else></CompB>
+        // </template>
         if (isDef(vnode.parent)) {
           let ancestor = vnode.parent
           const patchable = isPatchable(vnode)
