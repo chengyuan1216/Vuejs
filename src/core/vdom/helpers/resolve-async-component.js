@@ -68,6 +68,7 @@ export function resolveAsyncComponent (
     return factory.loadingComp
   }
 
+  // 第一次使用
   if (owner && !isDef(factory.owners)) {
     // owners用来保存那些组件实例用到了这个异步组件
     const owners = factory.owners = [owner]
@@ -77,7 +78,7 @@ export function resolveAsyncComponent (
     // 当父组件被销毁时，父组件从owners上移除
     ;(owner: any).$on('hook:destroyed', () => remove(owners, owner))
 
-    // 父组件强制更新
+    // 当异步组件请求返回时, 父组件强制更新
     const forceRender = (renderCompleted: boolean) => {
       for (let i = 0, l = owners.length; i < l; i++) {
         (owners[i]: any).$forceUpdate()
@@ -126,18 +127,46 @@ export function resolveAsyncComponent (
 
     // 如果factory执行后返回的是一个对象
     if (isObject(res)) {
+      // 返回的是一个promise对象
+      /**
+        function (resolve, reject) {
+          setTimeout(function () {
+            resolve({
+              template: '<div>I am async!</div>'
+            })
+          }, 1000)
+        }
+        */
       if (isPromise(res)) {
         // () => Promise
         if (isUndef(factory.resolved)) {
           res.then(resolve, reject)
         }
+
+      /*
+        const AsyncComponent = () => ({
+          // 需要加载的组件 (应该是一个 `Promise` 对象)
+          component: import('./MyComponent.vue'),
+          // 异步组件加载时使用的组件
+          loading: LoadingComponent,
+          // 加载失败时使用的组件
+          error: ErrorComponent,
+          // 展示加载时组件的延时时间。默认值是 200 (毫秒)
+          delay: 200,
+          // 如果提供了超时时间且组件加载也超时了，
+          // 则使用加载失败时使用的组件。默认值是：`Infinity`
+          timeout: 3000
+        })
+      */
       } else if (isPromise(res.component)) {
         res.component.then(resolve, reject)
 
+        // error组件
         if (isDef(res.error)) {
           factory.errorComp = ensureCtor(res.error, baseCtor)
         }
 
+        // loading组件
         if (isDef(res.loading)) {
           factory.loadingComp = ensureCtor(res.loading, baseCtor)
           if (res.delay === 0) {
@@ -153,6 +182,7 @@ export function resolveAsyncComponent (
           }
         }
 
+        // 请求超时
         if (isDef(res.timeout)) {
           timerTimeout = setTimeout(() => {
             timerTimeout = null

@@ -11,7 +11,7 @@ export function normalizeScopedSlots (
   prevSlots?: { [key: string]: Function } | void
 ): any {
   let res
-  // $slot上本来有的数据
+  // vm.$slots上本来有的数据
   const hasNormalSlots = Object.keys(normalSlots).length > 0
   // slots是否稳定？
   // 1、传入的slots有$stable标识
